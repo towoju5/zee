@@ -1,0 +1,11 @@
+{
+    "name": "Monnify",
+    "alias": "monnify",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Monnify\\app\\Providers\\MonnifyServiceProvider"
+    ],
+    "files": []
+}
