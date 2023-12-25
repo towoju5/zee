@@ -39,6 +39,58 @@ class MonnetServices
         }
     }
 
+    public function buildPayinPayload($amount, $currency, $method)
+    {
+        try {
+            $request = request();
+            $user = $request->user();
+            $data = [
+                'payinMerchantID' => '00',
+                'payinAmount' => $amount,
+                'payinCurrency' => $currency,
+                'payinMerchantOperationNumber' => '0000',
+                'payinMethod' => 'BankTransfer',
+                'payinVerification' => 'string',
+                'payinCustomerName' => $user->name,
+                'payinCustomerLastName' => $user->lastName,
+                'payinCustomerEmail' => $user->email,
+                'payinCustomerPhone' => $user->phoneNumber,
+                'payinCustomerTypeDocument' => 'DNI',
+                'payinCustomerDocument' => '00000000',
+                'payinRegularCustomer' => $user->name,
+                'payinCustomerID' => $user->id,
+                'payinDiscountCoupon' => 'string',
+                'payinLanguage' => 'EN',
+                'payinExpirationTime' => '000',
+                'payinDateTime' => date('YYYY-MM-DD'),
+                'payinTransactionOKURL' => 'https://test.com',
+                'payinTransactionErrorURL' => 'https://test.com',
+                'payinFilterBy' => 'string',
+                'payinCustomerAddress' => 'string',
+                'payinCustomerCity' => 'string',
+                'payinCustomerRegion' => 'string',
+                'payinCustomerCountry' => 'Peru',
+                'payinCustomerZipCode' => '0000',
+                'payinCustomerShippingName' => 'string',
+                'payinCustomerShippingPhone' => '0000',
+                'payinCustomerShippingAddress' => 'string',
+                'payinCustomerShippingCity' => 'string',
+                'payinCustomerShippingRegion' => 'string',
+                'payinCustomerShippingCountry' => 'Peru',
+                'payinCustomerShippingZipCode' => '0000',
+                'payinProductID' => '0000',
+                'payinProductDescription' => 'string',
+                'payinProductAmount' => '0000',
+                'payinProductSku' => 'string',
+                'payinProductQuantity' => '0000',
+                'URLMonnet' => 'https://cert.monnetpayments.com/api-payin/v1/online-payments',
+                'typePost' => 'json',
+            ];
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
+    }
+
     public function buildPayoutPayload($beneficiaryId)
     {
         $request = request();

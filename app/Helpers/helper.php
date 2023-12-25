@@ -8,10 +8,11 @@ if (!function_exists('user_can')) {
     /**
      * @return bool
      */
-    function user_can($permission) {
+    function user_can($permission)
+    {
         $result = false;
         $user = request()->user() ?? [];
-        if($user && $user->isAbleTo($permission)) {
+        if ($user && $user->isAbleTo($permission)) {
             $result = true;
         }
         return $result;
@@ -37,22 +38,25 @@ if (!function_exists('to_array')) {
     }
 }
 
-if(function_exists('isApi')) {
-    function isApi() {
-        if(request()->is('api/*')){
+if (function_exists('isApi')) {
+    function isApi()
+    {
+        if (request()->is('api/*')) {
             return true;
         }
     }
 }
 
-if(function_exists('smart_sms')) {
-    function smart_sms($message, $phoneNumber) {
+if (function_exists('smart_sms')) {
+    function smart_sms($message, $phoneNumber)
+    {
         return true;
     }
 }
 
-if(function_exists('_date')) {
-    function _date($date) {
+if (function_exists('_date')) {
+    function _date($date)
+    {
         return $date->format('M. d, Y');
     }
 }
@@ -81,43 +85,48 @@ if (!function_exists('settings')) {
     }
 }
 
-if(function_exists('get_current_balance')) {
-    function get_current_balance($currency) {
+if (function_exists('get_current_balance')) {
+    function get_current_balance($currency)
+    {
         // return true;
         return $currency;
     }
 }
 
-if(function_exists('get_fees')) {
-    function get_fees($currency1, $amount, $currency2) {
+if (function_exists('get_fees')) {
+    function get_fees($currency1, $amount, $currency2)
+    {
         // return true;
         return 1;
     }
 }
 
-if(function_exists('getExchangeVal')) {
+if (function_exists('getExchangeVal')) {
     /**
      * Get and return the exchange rate
      */
-    function getExchangeVal($currency1, $currency2) {
+    function getExchangeVal($currency1, $currency2)
+    {
         // return true;
         return 1;
     }
 }
 
-if(function_exists('gateways')) {
+if (function_exists('gateways')) {
     /**
      * @param string $slug
      * @return boolean
      */
-    function gateways(string $slug) {
+    function gateways(string $slug)
+    {
         // return true;
         return 1;
     }
 }
 
-if(function_exists('get_success_response')) {
-    function get_success_response($data, $status_code = 200) {
+if (function_exists('get_success_response')) {
+    function get_success_response($data, $status_code = 200)
+    {
         $response = [
             'status' => 'success',
             'status_code' => $status_code,
@@ -129,8 +138,9 @@ if(function_exists('get_success_response')) {
     }
 }
 
-if(function_exists('get_error_response')) {
-    function get_error_response($data, $status_code = 400) {
+if (function_exists('get_error_response')) {
+    function get_error_response($data, $status_code = 400)
+    {
         return [
             'status' => 'failed',
             'status_code' => $status_code,
@@ -224,7 +234,7 @@ if (!function_exists('get_fees')) {
 if (!function_exists('exchange_rates')) {
     function exchange_rates($from, $to)
     {
-        $arr =['CLP'];
+        $arr = ['CLP'];
         if ($from != $to && (!in_array($from, $arr) && !in_array($to, $arr))) {
             $price = 0;
             if ($price == 0) {
@@ -235,7 +245,7 @@ if (!function_exists('exchange_rates')) {
                 ]);
                 $request = Http::get($url)->json();
                 $data = to_array($request);
-                
+
                 $price = $data['price'] ?? 0;
             }
 
@@ -259,7 +269,7 @@ if (!function_exists('exchange_rates')) {
             }
             if ($price > 0) {
                 return $price;
-            } else  {
+            } else {
                 return 0;
             }
         }
@@ -295,12 +305,54 @@ if (!function_exists('get_commision')) {
     }
 }
 
-if(!function_exists('active_user')) {
+if (!function_exists('active_user')) {
     function active_user()
     {
-        if(auth() && auth()->user()->currentTeam->id) {
+        if (auth() && auth()->user()->currentTeam->id) {
             return auth()->user()->currentTeam->id;
         }
         return auth()->id();
+    }
+}
+
+if (!function_exists('monnet_error_code')) {
+    /**
+     * Monnet payin error codes
+     */
+    function monnet_error_code($code)
+    {
+        $errorMessages = [
+            "0001" => "Error in payinMerchantID not valid (the field is empty)",
+            "0002" => "Error in payinAmount not valid (the field is empty)",
+            "0003" => "Error in payinCurrency not valid (the field is empty)",
+            "0004" => "Error in payinMerchantOperationNumber not valid (the field is empty)",
+            "0005" => "Error in payinVerification not valid (the field is empty)",
+            "0006" => "Error in payinTransactionErrorURL not valid (the field is empty)",
+            "0007" => "Error in payinTransactionOKURL not valid (the field is empty)",
+            "0008" => "Error in payinProcessorCode not valid",
+            "0009" => "Error payinMerchantID not valid (it's wrong)",
+            "0010" => "Error in payinVerification (it's wrong)",
+            "0011" => "Error in merchant not enabled",
+            "0012" => "Error in payinTransactionErrorURL not valid",
+            "0013" => "Error in payinTransactionOKURL not valid",
+            "0015" => "Error in payinAmount format not valid",
+            "0017" => "Error in payinCurrency not valid",
+            "0018" => "Error in processor not valid",
+            "0019" => "Error in currency, not exist for merchant",
+            "0022" => "Error in transaction payinCustomerTypeDocument no exits",
+            "0023" => "Error in transaction, payinCustomerDocument no exits",
+            "0024" => "Error in transaction, payinCustomerDocument no exits",
+            "0025" => "Customer Type Document invalid",
+            "0026" => "Customer Document invalid",
+            "0030" => "Error due to non-compliance with pre-authorization rules (only for Argentina)",
+            "0031" => "Error in processor, code value no registered",
+            "0032" => "Error in processor, key no registered",
+            "0040" => "Error in transaction, cbu is required",
+            "0041" => "Error in transaction, cuit is requiredYUNO",
+            "0042" => "Error on sendGateWay YUNO",
+            "0099" => "Internal Error Payin",
+        ];
+
+        return $errorMessages[$code] ?? "Error code not found";
     }
 }
