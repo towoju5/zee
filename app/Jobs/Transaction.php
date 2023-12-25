@@ -34,18 +34,13 @@ class Transaction implements ShouldQueue
         $data = $this->data;
         foreach ($data as $key => $d) {
             ModelsTransaction::create([
-                'meta_id'           => $data['id'],
-                'meta_key'      => $key,
-                'meta_value'    => $d,
-                'meta_type'     => $type
+                'meta_id'    => $data['id'],
+                'meta_key'   => $key,
+                'meta_value' => $d,
+                'meta_type'  => $type
             ]);
         }
-        // ModelsTransaction::create([
-        //     'transaction_id' => $data['id'],
-        //     'transaction_type' => $type,
-        //     'transaction_amount' => $data['amount'],
-        //     'transaction_data'  =>  $data,
-        //     // ''
-        // ]);
+
+        // inititate payout
     }
 }

@@ -1,12 +1,14 @@
 <?php
 
-namespace App\Modules\Payment\Services;
+namespace App\Services;
 
 use App\Models\Gateways;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Modules\BinancePay\app\Http\Controllers\BinancePayController;
 use Modules\CoinPayments\app\Http\Controllers\CoinPaymentsController;
+use Modules\Flutterwave\app\Http\Controllers\FlutterwaveController;
+use Modules\Monnify\app\Http\Controllers\MonnifyController;
 
 /**
  * This class is responsible for generating 
@@ -55,23 +57,41 @@ class PaymentService
             $init = $binance->init($amount, $currency);
             return $init;
         } catch (\Throwable $th) {
-            //throw $th;
+            return ['error' => $th->getMessage()];
         }
     }
 
     public function advcash($amount, $currency)
     {
-        //
+        try {
+            $binance = new BinancePayController();
+            $init = $binance->init($amount, $currency);
+            return $init;
+        } catch (\Throwable $th) {
+            return ['error' => $th->getMessage()];
+        }
     }
 
-    public function flutterwave()
+    public function flutterwave($amount, $currency)
     {
-        //
+        try {
+            $flutterwave = new FlutterwaveController();
+            $init = $flutterwave->makePayment($amount, $currency);
+            return $init;
+        } catch (\Throwable $th) {
+            return ['error' => $th->getMessage()];
+        }
     }
 
-    public function monnify()
+    public function monnify($amount, $currency)
     {
-        //
+        try {
+            $monnify = new MonnifyController();
+            $init = $monnify->createCheckout($amount, $currency);
+            return $init;
+        } catch (\Throwable $th) {
+            return ['error' => $th->getMessage()];
+        }
     }
 
     public function coinpayment($amount, $currency) : object | array

@@ -37,6 +37,14 @@ if (!function_exists('to_array')) {
     }
 }
 
+if(function_exists('isApi')) {
+    function isApi() {
+        if(request()->is('api/*')){
+            return true;
+        }
+    }
+}
+
 if(function_exists('smart_sms')) {
     function smart_sms($message, $phoneNumber) {
         return true;
@@ -98,7 +106,11 @@ if(function_exists('getExchangeVal')) {
 }
 
 if(function_exists('gateways')) {
-    function gateways($key) {
+    /**
+     * @param string $slug
+     * @return boolean
+     */
+    function gateways(string $slug) {
         // return true;
         return 1;
     }

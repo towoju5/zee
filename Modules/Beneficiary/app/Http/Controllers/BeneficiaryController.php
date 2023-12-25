@@ -34,11 +34,28 @@ class BeneficiaryController extends Controller
     public function store(Request $request): JsonResponse
     {
         try {
-            $data['user_id'] = auth()->user()->currentTeam->id;
-            $data['beneficiary'] = $request->beneficiary;
+            $validate = $request->validate([
+                "mode" => "required",
+                "address" => "required",
+                "nickname" => "required",
+                "currency" => "required",
+                "beneficiary" => "required",
+                "payment_object" => "required",
+            ]);
 
-            if($data) {
-                return get_success_response($data);
+            $data['user_id']        = auth()->user()->currentTeam->id;
+            $data['nickname']       = $request->nickname;
+            $data['mode']           = $request->mode;
+            $data['currency']       = $request->currency;
+            $data['address']        = $request->address;
+            $data['beneficiary']    = $request->beneficiary;
+            $data['payment_object'] = $request->payment_object;
+
+            if(Beneficiary::create($data)) {
+                if(isApi())
+                    return get_success_response($data);
+
+                return $data;
             }
             return get_error_response(['error' => 'Currently unable to add new beneficiaries']);
         } catch (\Throwable $th) {

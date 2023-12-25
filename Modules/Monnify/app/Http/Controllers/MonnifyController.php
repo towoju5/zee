@@ -14,11 +14,10 @@ class MonnifyController extends Controller
         $this->monnifyService = $monnifyService;
     }
 
-    public function createCheckout()
+    public function createCheckout($amount, $currency)
     {
-        $customerEmail = 'customer@example.com';
-        $amount = 1000; // Adjust as needed
-        $paymentReference = 'your_unique_reference'; // Adjust as needed
+        $customerEmail = auth()->user()->email;
+        $paymentReference = uuid(); 
 
         $checkoutUrl = $this->monnifyService->createCheckoutUrl($customerEmail, $amount, $paymentReference);
 
