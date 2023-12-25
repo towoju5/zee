@@ -4,11 +4,26 @@ namespace Modules\PayPal\app\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use PayPal\Auth\OAuthTokenCredential;
+use PayPal\Rest\ApiContext;
 use PaypalPayoutsSDK\Payouts\PayoutsPostRequest;
 use Sample\PayPalClient;
 
 class PayoutController extends Controller
 {
+    protected $apiContext;
+
+    public function __construct()
+    {
+        $this->apiContext = new ApiContext(
+            new OAuthTokenCredential(
+                config('services.paypal.client_id'),
+                config('services.paypal.secret')
+            )
+        );
+    }
+
+    // paypal payout starts here
     public function init(Request $request)
     {
         $user = $request->user();
@@ -55,5 +70,30 @@ class PayoutController extends Controller
             echo $error->name . "\n";
             echo $error->debug_id . "\n";
         }
+    }
+
+    public function payout_webhook(Request $request)
+    {
+        $webhookId = $request->header('Paypal-Transmission-Id');
+
+        $event = WebhookEvent::createFromJson($request->getContent(), $this->apiContext);
+
+        // Handle the event based on its type
+        switch ($event->event_type) {
+            case 'PAYMENT.PAYOUTS-ITEM.SUCCEEDED':
+                $this->handlePayoutSucceeded($event);
+                break;
+            // Add more cases for other event types as needed
+        }
+
+        return response()->json(['status' => 'success']);
+    }
+
+    protected function handlePayoutSucceeded(WebhookEvent $event)
+    {
+        // Extract information from the event
+        $payoutItemId = $event->resource->id;
+        $amount = $event->resource->amount->value;
+        // Handle the payout success event, e.g., update your database
     }
 }

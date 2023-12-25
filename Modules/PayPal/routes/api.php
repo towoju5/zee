@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Modules\PayPal\app\Http\Controllers\PayPalDepositController;
 
 /*
     |--------------------------------------------------------------------------
@@ -16,4 +17,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum'])->prefix('v1')->name('api.')->group(function () {
     Route::get('paypal', fn (Request $request) => $request->user())->name('paypal');
+    
+    Route::post('paypal/deposit', [PayPalDepositController::class, 'createOrder'])->name('createOrder');
+    Route::get('paypal/capture', [PayPalDepositController::class, 'captureOrder'])->name('captureOrder');
 });

@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Modules\Bitnob\app\Http\Controllers\BitnobController;
 
 /*
     |--------------------------------------------------------------------------
@@ -15,5 +16,13 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware(['auth:sanctum'])->prefix('v1')->name('api.')->group(function () {
-    Route::get('bitnob', fn (Request $request) => $request->user())->name('bitnob');
+    Route::get('bitnob', fn (Request $request) => $request->user())->name('bitnob');    
+    Route::post('bitnob/reg-user',              [BitnobController::class, 'reg_user']);
+    Route::post('bitnob/create-card',           [BitnobController::class, 'createCard']);
+    Route::post('bitnob/topup-card/{cardId}',   [BitnobController::class, 'topupCard']);
+    Route::get('bitnob/get-card/{cardId}',      [BitnobController::class, 'getCard']);
+    Route::get('bitnob/transactions/{cardId}',  [BitnobController::class, 'transactions']);
+
+    // supported actions are freeze and unfreeze
+    Route::post('bitnob/freeze-unfreeze/{action}/{cardId}', [BitnobController::class, 'freeze_unfreeze']);
 });

@@ -282,3 +282,13 @@ if (!function_exists('get_commision')) {
         return $commission;
     }
 }
+
+if(!function_exists('active_user')) {
+    function active_user()
+    {
+        if(auth() && auth()->user()->currentTeam->id) {
+            return auth()->user()->currentTeam->id;
+        }
+        return auth()->id();
+    }
+}

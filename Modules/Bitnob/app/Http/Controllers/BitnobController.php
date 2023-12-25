@@ -9,59 +9,108 @@ use Illuminate\Http\Response;
 
 class BitnobController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function reg_user(Request $request)
     {
-        return view('bitnob::index');
+        try {
+            $user = $request->user();
+            $data = [
+                'customerEmail'     => $user->email,
+                'idNumber'          => $user->idNumber,
+                'idType'            => $user->idType,
+                'firstName'         => $user->firstName,
+                'lastName'          => $user->lastName,
+                'phoneNumber'       => $user->phoneNumber,
+                'city'              => $user->city,
+                'state'             => $user->state,
+                'country'           => $user->country,
+                'zipCode'           => $user->zipCode,
+                'line1'             => $user->address,
+                'houseNumber'       => $user->houseNumber,
+                'idImage'           => $user->verificationDocument,
+            ];
+            $result = app('bitnob')->regUser($data);
+            if($result) {
+                return get_success_response($result);
+            }
+        } catch (\Throwable $th) {
+            return get_error_response(['error' => $result]);
+        }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function createCard(Request $request)
     {
-        return view('bitnob::create');
+        try {
+            $data = [
+                'customerEmail' => 'johndoe@gmail.com',
+                'cardBrand'     => 'visa', // cardBrand should be "visa" or "mastercard"
+                'cardType'      => 'virtual',
+                'reference'     => '4f644a2c-3c4f-48c7-a3fa-e896b544d546',
+                'amount'        => 5000,
+            ];
+            $result = app('bitnob')->create($data);
+            if($result) {
+                return get_success_response($result);
+            }
+        } catch (\Throwable $th) {
+            return get_error_response(['error' => $result]);
+        }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request): RedirectResponse
+    public function topupCard(Request $request, $cardId)
     {
-        //
+        try {
+            $arr = [
+                'cardId'    => $cardId,
+                'reference' => uniqid(),
+                'amount'    => $request->amount,
+            ];
+            $result = app('bitnob')->topup($arr);
+            if($result) {
+                return get_success_response($result);
+            }
+        } catch (\Throwable $th) {
+            return get_error_response(['error' => $result]);
+        }
     }
 
-    /**
-     * Show the specified resource.
-     */
-    public function show($id)
+    public function freeze_unfreeze($action, $cardId)
     {
-        return view('bitnob::show');
+        /**
+         * Freeze or unfreeze card
+         */
+        try {
+            if($action != 'freeze' AND $action != 'unfreeze') return get_error_response(['error' => 'Invalid action type']);
+            $action = $action; 
+            $result = app('bitnob')->action($action, $cardId);
+            if($result) {
+                return get_success_response($result);
+            }
+        } catch (\Throwable $th) {
+            return get_error_response(['error' => $result]);
+        }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
+    public function getCard($cardId)
     {
-        return view('bitnob::edit');
+        try {
+            $result = app('bitnob')->getCard($cardId);
+            if($result) {
+                return get_success_response($result);
+            }
+        } catch (\Throwable $th) {
+            return get_error_response(['error' => $result]);
+        }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id): RedirectResponse
+    public function transactions(Request $request, $cardId)
     {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id)
-    {
-        //
+        try {
+            $result = app('bitnob')->getTransaction($cardId);
+            if($result) {
+                return get_success_response($result);
+            }
+        } catch (\Throwable $th) {
+            return get_error_response(['error' => $result]);
+        }
     }
 }

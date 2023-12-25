@@ -3,6 +3,7 @@
 namespace App\Events;
 
 use App\Models\User;
+use App\Notifications\WalletNotification;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -26,6 +27,8 @@ class DebitCreditEvent implements ShouldQueue
         $this->customer = $customer;
         $this->amount = $amount;
         $this->type = $type;
+        $this->wallet = $wallet;
+        $customer->notifyNow(new WalletNotification($amount, $type, $wallet));
     }
 
     /**
@@ -43,10 +46,10 @@ class DebitCreditEvent implements ShouldQueue
     public function broadcastWith()
     {
         return [
-            'customer'  => $this->customer,
             'amount'    => $this->amount,
             'wallet'    => $this->wallet,
             'type'      => $this->type,
+            'customer'  => $this->customer,
         ];
     }
 }

@@ -6,62 +6,60 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use KingFlamez\Rave\Facades\Rave as Flutterwave;
+use PhpParser\Node\Stmt\Return_;
 
 class FlutterwaveController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function makePayment($amount, $currency="NGN")
     {
-        return view('flutterwave::index');
+        try {
+            //This generates a payment reference
+            $reference = Flutterwave::generateReference();
+            $user = auth()->user();
+            // Enter the details of the payment
+            $data = [
+                'payment_options' => 'card,banktransfer',
+                'amount' => $amount,
+                'email' => $user->email,
+                'tx_ref' => $reference,
+                'currency' => $currency,
+                // 'redirect_url' => route('callback'),
+                'customer' => [
+                    'email' => $user->email,
+                    "phone_number" => $user->phone,
+                    "name" => $user->name
+                ],
+
+                "customizations" => [
+                    "title" => getenv('APP_NAME'),
+                    "description" => "20th October"
+                ]
+            ];
+
+            $payment = Flutterwave::initializePayment($data);
+
+
+            if ($payment['status'] !== 'success') {
+                // notify something went wrong
+                return $payment;
+            }
+
+            // return the payment link
+            return $payment['data']['link'];
+        } catch (\Throwable $th) {
+            return ['error' => $th->getMessage()];
+        }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function validatePayment($transactionId)
     {
-        return view('flutterwave::create');
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request): RedirectResponse
-    {
-        //
-    }
-
-    /**
-     * Show the specified resource.
-     */
-    public function show($id)
-    {
-        return view('flutterwave::show');
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
-    {
-        return view('flutterwave::edit');
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id): RedirectResponse
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id)
-    {
-        //
+        try {
+            // $transactionID = Flutterwave::getTransactionIDFromCallback();
+            $data = Flutterwave::verifyTransaction($transactionId);
+            return $data;
+        } catch (\Throwable $th) {
+            return ['error' => $th->getMessage()];
+        }
     }
 }

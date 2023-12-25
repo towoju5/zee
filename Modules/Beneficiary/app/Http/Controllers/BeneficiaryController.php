@@ -44,8 +44,6 @@ class BeneficiaryController extends Controller
         } catch (\Throwable $th) {
             return get_error_response(['error' => $th->getMessage()]);
         }
-
-        return response()->json($this->data);
     }
 
     /**
@@ -53,9 +51,15 @@ class BeneficiaryController extends Controller
      */
     public function show($id): JsonResponse
     {
-        //
-
-        return response()->json($this->data);
+        try {
+            $beneficiary = Beneficiary::whereUserId(auth()->user()->currentTeam->id)->where('id', $id)->first();
+            if($beneficiary) {
+                return get_success_response($beneficiary);
+            }
+            return get_error_response(['error', "Beneficiary with the provided data not found"]);
+        } catch (\Throwable $th) {
+            return get_error_response(['error' => $th->getMessage()]);
+        }
     }
 
     /**
@@ -63,9 +67,17 @@ class BeneficiaryController extends Controller
      */
     public function update(Request $request, $id): JsonResponse
     {
-        //
+        try {
+            $data['user_id'] = auth()->user()->currentTeam->id;
+            $data['beneficiary'] = $request->beneficiary;
 
-        return response()->json($this->data);
+            if($data) {
+                return get_success_response($data);
+            }
+            return get_error_response(['error' => 'Currently unable to add new beneficiaries']);
+        } catch (\Throwable $th) {
+            return get_error_response(['error' => $th->getMessage()]);
+        }
     }
 
     /**
@@ -73,8 +85,14 @@ class BeneficiaryController extends Controller
      */
     public function destroy($id): JsonResponse
     {
-        //
-
-        return response()->json($this->data);
+        try {
+            $beneficiary = Beneficiary::whereUserId(auth()->user()->currentTeam->id)->where('id', $id)->first();
+            if($beneficiary->delete()) {
+                return get_success_response(['msg' => 'Beneficiary deleted successfully']);
+            }
+            return get_error_response(['error', "Beneficiary with the provided data not found"]);
+        } catch (\Throwable $th) {
+            return get_error_response(['error' => $th->getMessage()]);
+        }
     }
 }

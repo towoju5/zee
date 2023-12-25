@@ -8,7 +8,9 @@ use App\Models\Gateways;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Modules\SendMoney\app\Models\SendMoney;
+use Modules\SendMoney\app\Models\SendQuote;
 use Modules\SendMoney\app\Notifications\SendMoneyNotification;
+use Modules\SendMoney\app\Notifications\SendMoneyQuoteNotification;
 
 class SendMoneyController extends Controller
 {
@@ -42,32 +44,59 @@ class SendMoneyController extends Controller
 		}
 	}
 
-	public function send_money(Request $request)
+	public function get_quote(Request $request)
 	{
 		try {
 			$validate  = $request->validate([
-				'amount' 	=> 'required',
 				'action' 	=> 'required',
-				'gateway'	=>	'required',
-				'send_currency'		=> 'require',
-				'receive_currency' 	=> 'required',
-				'transfer_purpose' 	=> 'required',
+				'send_amount' 		=> 'required',
+				'receive_amount' 	=> 'required',
+				'send_gateway'		=>	'required',
+				'receive_gateway'	=>	'required',
+				'send_currency'		=>	'required',
+				'receive_currency' 	=>	'required',
+				'transfer_purpose' 	=>	'required',
 			]);
 
 			$user = User::find(auth()->user()->currentTeam->id);
 			$validate['rate'] = null;
-			$validate['user_id'] = $user->id;
+			$validate['user_id'] = active_user();
 			$validate['total_amount'] = null;
-			// $validate['total_amount'] = null;
 			$validate['raw_data'] = $request->all();
+
+			// calulate quote fees
 			
-			if($send = SendMoney::create($validate)){
+			if($send = SendQuote::create($validate)){
 				// add transaction history
-				dispatch(new Transaction($send, 'send_money'));
+				@dispatch(new SendMoneyQuoteNotification($send, 'send_money'));
 				$user->notify(new SendMoneyNotification($send));
 				return get_success_response($validate);
 			}
 			return get_error_response(['error' => 'Unable to process send request please contact support']);
+		} catch (\Throwable $th) {
+			get_error_response(['error' => $th->getMessage()]);
+		}
+	}
+
+	public function send_money(Request $request)
+	{
+		try {
+			$validate  = $request->validate([
+				'quote_id' 	=> 'required'
+			]);
+
+			$user = User::find(auth()->user()->currentTeam->id);
+			$get_quote = SendQuote::whereId($request->quote_id)->first();
+			if($get_quote){
+				if($send = SendMoney::create($validate)){
+					// add transaction history
+					dispatch(new Transaction($send, 'send_money'));
+					$user->notify(new SendMoneyNotification($send));
+					return get_success_response($validate);
+				}
+				return get_error_response(['error' => 'Unable to process send request please contact support']);
+			}
+			return get_error_response(['error' => 'Transaction quote not found or expired']);
 		} catch (\Throwable $th) {
 			get_error_response(['error' => $th->getMessage()]);
 		}
