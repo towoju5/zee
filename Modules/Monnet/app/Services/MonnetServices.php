@@ -15,7 +15,11 @@ class MonnetServices
 
     public function makePayment()
     {
-        //
+        try {
+            //code...
+        } catch (\Throwable $th) {
+            //throw $th;
+        }
     }
 
     public function payout($beneficiaryId)

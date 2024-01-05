@@ -6,62 +6,28 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Modules\Pomelo\app\Services\PomeloPayServices;
 
 class PomeloController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public $pomelo_services;
+
+    public function __construct()
     {
-        return view('pomelo::index');
+        $this->pomelo_services = new PomeloPayServices();
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function webhook(Request $request, $orderId)
     {
-        return view('pomelo::create');
-    }
+        // Usage example
+        $headers = [
+            'X-Signature-Nonce' => 'your_nonce',
+            'X-Signature-Timestamp' => 'your_timestamp',
+            'X-Signature' => 'received_signature'
+        ];
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request): RedirectResponse
-    {
-        //
-    }
-
-    /**
-     * Show the specified resource.
-     */
-    public function show($id)
-    {
-        return view('pomelo::show');
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
-    {
-        return view('pomelo::edit');
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id): RedirectResponse
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id)
-    {
-        //
+        $apiKey = 'your_api_key';
+        $isValidSignature = $this->pomelo_services->verify_webhook($headers, $apiKey);
+        var_dump($isValidSignature);
     }
 }

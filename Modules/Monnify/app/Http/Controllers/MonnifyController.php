@@ -9,7 +9,7 @@ class MonnifyController extends Controller
 {
     protected $monnifyService;
 
-    public function __construct(MonnifyService $monnifyService)
+    public function __construct(MonnifyService $monnifyService = null)
     {
         $this->monnifyService = $monnifyService;
     }

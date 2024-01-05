@@ -16,4 +16,6 @@ use Modules\Pomelo\app\Http\Controllers\PomeloController;
 
 Route::group([], function () {
     Route::resource('pomelo', PomeloController::class)->names('pomelo');
+
+    Route::any("pomelo/webhook/{orderId}", [PomeloController::class, 'webhook']);
 });
