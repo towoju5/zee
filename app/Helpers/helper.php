@@ -308,10 +308,10 @@ if (!function_exists('get_commision')) {
 if (!function_exists('active_user')) {
     function active_user()
     {
-        if (auth() && auth()->user()->currentTeam->id) {
-            return auth()->user()->currentTeam->id;
+        if (auth() && active_user()) {
+            return active_user();
         }
-        return auth()->id();
+        return active_user();
     }
 }
 

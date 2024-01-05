@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Jobs\Transaction;
 use App\Models\Gateways;
 use App\Models\User;
+use App\Services\PaymentService;
 use Illuminate\Http\Request;
 use Modules\SendMoney\app\Models\SendMoney;
 use Modules\SendMoney\app\Models\SendQuote;
@@ -44,7 +45,7 @@ class SendMoneyController extends Controller
 		}
 	}
 
-	public function get_quote(Request $request)
+	public function create_quote(Request $request)
 	{
 		try {
 			$validate  = $request->validate([
@@ -58,7 +59,7 @@ class SendMoneyController extends Controller
 				'transfer_purpose' 	=>	'required',
 			]);
 
-			$user = User::find(auth()->user()->currentTeam->id);
+			$user = User::find(active_user());
 			$validate['rate'] = null;
 			$validate['user_id'] = active_user();
 			$validate['total_amount'] = null;
@@ -85,21 +86,33 @@ class SendMoneyController extends Controller
 				'quote_id' 	=> 'required'
 			]);
 
-			$user = User::find(auth()->user()->currentTeam->id);
+			$user = User::find(active_user());
 			$get_quote = SendQuote::whereId($request->quote_id)->first();
 			if($get_quote){
+				$validate['user_id'] = active_user();
+				$validate['status'] = 'pending';
 				if($send = SendMoney::create($validate)){
 					// add transaction history
 					dispatch(new Transaction($send, 'send_money'));
 					$user->notify(new SendMoneyNotification($send));
-					return get_success_response($validate);
-				}
+					$paymentUrl = (new PaymentService())->makePayment($get_quote->amount, $get_quote->currency, $get_quote->gateway);
+					return get_success_response(['link' => $paymentUrl, 'quote' => $get_quote]);
+				}  
 				return get_error_response(['error' => 'Unable to process send request please contact support']);
 			}
 			return get_error_response(['error' => 'Transaction quote not found or expired']);
 		} catch (\Throwable $th) {
 			get_error_response(['error' => $th->getMessage()]);
 		}
+	} 
+
+	public function complete_send_money($quoteId)
+	{
+		try {
+			
+		} catch (\Throwable $th) {
+			//throw $th;
+		}
 	}
-}
+}  
 

@@ -4,6 +4,7 @@ namespace Modules\PayPal\app\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Modules\SendMoney\app\Models\SendQuote;
 use PayPal\Auth\OAuthTokenCredential;
 use PayPal\Rest\ApiContext;
 use PaypalPayoutsSDK\Payouts\PayoutsPostRequest;
@@ -24,9 +25,10 @@ class PayoutController extends Controller
     }
 
     // paypal payout starts here
-    public function init(Request $request)
+    public function init($quoteId)
     {
-        $user = $request->user();
+        $quote = SendQuote::whereId($quoteId)->first();
+        $user = $get_user($quote->user_id);
         $requestBody = [
             'sender_batch_header' => [ 
                 'email_subject' => 'Payout from $user->name via ' . getenv('APP_NAME'),

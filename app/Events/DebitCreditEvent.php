@@ -39,7 +39,7 @@ class DebitCreditEvent implements ShouldQueue
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('balance-update.'.auth()->id()),
+            new PrivateChannel('balance-update.'.active_user()),
         ];
     }
 

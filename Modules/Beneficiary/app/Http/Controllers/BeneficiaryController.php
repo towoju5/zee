@@ -18,7 +18,7 @@ class BeneficiaryController extends Controller
     {
         try {
             $per_page  = $request->per_page ?? 20;
-            $query = Beneficiary::whereUserId(auth()->user()->currentTeam->id)->paginate($per_page);
+            $query = Beneficiary::whereUserId(active_user())->paginate($per_page);
             if($query) {
                 return get_success_response($query);
             }
@@ -43,7 +43,7 @@ class BeneficiaryController extends Controller
                 "payment_object" => "required",
             ]);
 
-            $data['user_id']        = auth()->user()->currentTeam->id;
+            $data['user_id']        = active_user();
             $data['nickname']       = $request->nickname;
             $data['mode']           = $request->mode;
             $data['currency']       = $request->currency;
@@ -69,7 +69,7 @@ class BeneficiaryController extends Controller
     public function show($id): JsonResponse
     {
         try {
-            $beneficiary = Beneficiary::whereUserId(auth()->user()->currentTeam->id)->where('id', $id)->first();
+            $beneficiary = Beneficiary::whereUserId(active_user())->where('id', $id)->first();
             if($beneficiary) {
                 return get_success_response($beneficiary);
             }
@@ -85,7 +85,7 @@ class BeneficiaryController extends Controller
     public function update(Request $request, $id): JsonResponse
     {
         try {
-            $data['user_id'] = auth()->user()->currentTeam->id;
+            $data['user_id'] = active_user();
             $data['beneficiary'] = $request->beneficiary;
 
             if($data) {
@@ -103,7 +103,7 @@ class BeneficiaryController extends Controller
     public function destroy($id): JsonResponse
     {
         try {
-            $beneficiary = Beneficiary::whereUserId(auth()->user()->currentTeam->id)->where('id', $id)->first();
+            $beneficiary = Beneficiary::whereUserId(active_user())->where('id', $id)->first();
             if($beneficiary->delete()) {
                 return get_success_response(['msg' => 'Beneficiary deleted successfully']);
             }

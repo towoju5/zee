@@ -17,6 +17,20 @@ class PomeloController extends Controller
         $this->pomelo_services = new PomeloPayServices();
     }
 
+    public function makePayment(Request $request)
+    {
+        try {
+            $request->validate([
+                'amount' => 'required',
+                'currency' => 'currency'
+            ]);
+            $checkout = $this->pomelo_services->init($request->amount, $request->currency);
+            return get_success_response($checkout);
+        } catch (\Throwable $th) {
+            return get_error_response(['error' => $th->getMessage()]);
+        }
+    }
+
     public function webhook(Request $request, $orderId)
     {
         // Usage example

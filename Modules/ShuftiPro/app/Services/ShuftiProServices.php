@@ -11,7 +11,7 @@ class ShuftiProServices
     public function init(Request $request)
     {
         try {
-            $customer = User::finf(auth()->id());
+            $customer = User::finf(active_user());
             $url = 'https://api.shuftipro.com/';
  
             $client_id  = getenv('SHUFTI_PRO_CLIENT_ID');

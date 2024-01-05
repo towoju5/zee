@@ -9,6 +9,7 @@ use Modules\BinancePay\app\Http\Controllers\BinancePayController;
 use Modules\CoinPayments\app\Http\Controllers\CoinPaymentsController;
 use Modules\Flutterwave\app\Http\Controllers\FlutterwaveController;
 use Modules\Monnify\app\Http\Controllers\MonnifyController;
+use Modules\PayPal\app\Http\Controllers\PayoutController;
 use Modules\PayPal\app\Http\Controllers\PayPalDepositController;
 use Modules\PayPal\app\Providers\PayPalServiceProvider;
 
@@ -24,89 +25,77 @@ class PaymentService
      * then make request to gateway and 
      * return payment url or charge status for wallet
      */
-    public function makePayment($amount, $currency, $gateway) : bool|string
+    public function makePayment($quoteId, $gateway) : bool|string
     {
         try {
-            if($gateway == 'wallet') { 
-                $user = User::find(active_user());
-                if($user->hasWallet($currency)) {   
-                    $walletBalance = $user->getWallet($currency);
-                    if($walletBalance < $amount) {
-                        if(getenv('APP_DEBUG') == true) {
-                            Log::info("Insuficient balance for $user->id transaction amount  $amount on ".now());
-                        }
-                        return false;
-                    }
-                }
-            }
             $paymentMethods = Gateways::whereStatus(SELF::ACTIVE)->get();
             foreach ($paymentMethods as $methods) {
                 if($gateway == $methods->slug && gateways($methods->slug) == true) {
                     $model = strtolower($methods->slug);
-                    return self::$model($amount, $currency);
+                    return self::$model($quoteId);
                 }
             }
             return false;
         } catch (\Throwable $th) {
-            return get_error_response(['eerror' => $th->getMessage()]);
+            return get_error_response(['error' => $th->getMessage()]);
         }
     }
 
-    public function binance_pay($amount, $currency)
+    public function binance_pay($quoteId)
     {
         try {
             $binance = new BinancePayController();
-            $init = $binance->init($amount, $currency);
+            $init = $binance->init($quoteId);
             return $init;
         } catch (\Throwable $th) {
             return ['error' => $th->getMessage()];
         }
     }
 
-    public function advcash($amount, $currency)
+    public function advcash($quoteId)
     {
         try {
             $binance = new BinancePayController();
-            $init = $binance->init($amount, $currency);
+            $init = $binance->init($quoteId);
             return $init;
         } catch (\Throwable $th) {
             return ['error' => $th->getMessage()];
         }
     }
 
-    public function flutterwave($amount, $currency)
+    public function flutterwave($quoteId)
     {
         try {
             $flutterwave = new FlutterwaveController();
-            $init = $flutterwave->makePayment($amount, $currency);
+            $init = $flutterwave->makePayment($quoteId);
             return $init;
         } catch (\Throwable $th) {
             return ['error' => $th->getMessage()];
         }
     }
 
-    public function monnify($amount, $currency)
+    public function monnify($quoteId)
     {
         try {
             $monnify = new MonnifyController();
-            $init = $monnify->createCheckout($amount, $currency);
+            $init = $monnify->createCheckout($quoteId);
             return $init;
         } catch (\Throwable $th) {
             return ['error' => $th->getMessage()];
         }
     }
 
-    public function coinpayment($amount, $currency) : object | array
+    public function coinpayment($quoteId) : object | array
     {
         $coinpayment = new CoinPaymentsController();
-        $checkout = $coinpayment->makePayment($amount, $currency);
+        $checkout = $coinpayment->makePayment($quoteId);
         return $checkout;
     }
 
-    public function paypal($amount, $currency) : object|array
+    public function paypal($quoteId) : object|array
     {
-        $paypal = new PayPalDepositController();
-        $checkout = $paypal->createOrder($amount, $currency);
+        $paypal = new PayoutController();
+        $checkout = $paypal->init($quoteId);
         return $checkout;
     }
 }
