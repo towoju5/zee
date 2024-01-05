@@ -13,7 +13,14 @@ class DepositController extends Controller
      */
     public function index()
     {
-        //
+        try {
+            $request = request();
+            $per_page = $request->per_page ?? 10;
+            $deposits = Deposit::whereUserId(active_user())->paginate($per_page);
+            return get_success_response($deposits);
+        } catch (\Throwable $th) {
+            return get_error_response(['error' => $th->getMessage()]);
+        }
     }
 
     /**
@@ -51,22 +58,12 @@ class DepositController extends Controller
      */
     public function show(string $id)
     {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        try {
+            $deposit = Deposit::whereUserId(active_user())->where(['id' => $id])->first();
+            if(!$deposit) return get_error_response(['error' => "Transaction not found"]);
+            return get_success_response($deposit);
+        } catch (\Throwable $th) {
+            return get_error_response(['error' => $th->getMessage()]);
+        }
     }
 }
