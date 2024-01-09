@@ -14,5 +14,6 @@
     "BinancePay": true,
     "CoinPayments": true,
     "SendMoney": true,
-    "Beneficiary": true
+    "Beneficiary": true,
+    "Currencies": true
 }
