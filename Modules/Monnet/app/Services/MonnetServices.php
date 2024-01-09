@@ -112,12 +112,12 @@ class MonnetServices
                 'lastName' => $customer->lastName,
                 'email' => $customer->email,
                 'document' => [
-                    'type' => $customer->document_type,
+                    'type' => $customer->idType,
                     'number' => $customer->document_number,
                 ],
                 'address' => [
                     'street' => $customer->address->street,
-                    'houseNumber' => $customer->address->houseNumber,
+                    'houseNumber' => $customer->houseNumber,
                     'additionalInfo' => $customer->address->additionalInfo,
                     'city' => $customer->address->city,
                     'province' => $customer->address->province,

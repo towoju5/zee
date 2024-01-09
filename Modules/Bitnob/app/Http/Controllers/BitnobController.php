@@ -24,7 +24,7 @@ class BitnobController extends Controller
                 'state'             => $user->state,
                 'country'           => $user->country,
                 'zipCode'           => $user->zipCode,
-                'line1'             => $user->address,
+                'line1'             => $user->street,
                 'houseNumber'       => $user->houseNumber,
                 'idImage'           => $user->verificationDocument,
             ];
