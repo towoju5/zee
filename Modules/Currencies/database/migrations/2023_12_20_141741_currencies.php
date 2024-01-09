@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('settings', function (Blueprint $table) {
             $table->id();
             $table->string('wallet');
-            $table->integer('main_balance', 20,8)->default(0);
-            $table->integer('ledger_balance', 20, 8)->default(0);
+            $table->integer('main_balance')->default(0);
+            $table->integer('ledger_balance')->default(0);
             $table->string('currency_icon');
             $table->string('currency_name');
             $table->enum('balance_type', ['fiat', 'crypto'])->default('fiat');
