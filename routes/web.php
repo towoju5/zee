@@ -26,3 +26,8 @@ Route::middleware([
         return view('dashboard');
     })->name('dashboard');
 });
+
+
+Route::fallback(function() {
+    return get_error_response(['error' => 'Please check your request, we\'re unable to match your request.', 'generated-strings' => uuid()]);
+});

@@ -56,7 +56,7 @@ class PaymentService
     {
         try {
             $binance = new BinancePayController();
-            $init = $binance->init($quoteId);
+            $init = $binance->withdrawal(request());
             return $init;
         } catch (\Throwable $th) {
             return ['error' => $th->getMessage()];
