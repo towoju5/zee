@@ -36,6 +36,8 @@ Route::group(['prefix'  => 'v1/auth'], function(){
 
 
 Route::middleware(['auth:api'])->prefix('v1')->name('api.')->group(function () {
+    Route::put('update-profile', [AuthController::class, 'updateProfile']);
+
     Route::get('user-meta', [UserMetaController::class, 'index']);
     Route::get('user-meta/{id}', [UserMetaController::class, 'show']);
     Route::post('user-meta', [UserMetaController::class, 'store']);

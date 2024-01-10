@@ -169,4 +169,55 @@ class AuthController extends Controller
 
         return get_error_response(['error' => 'Invalid OTP'], 422);
     }
+
+    public function updateProfile(Request $request)
+    {
+        // Validate the incoming request data
+        $validator = Validator::make($request->all(), [
+            'name' => 'required',
+            'businessName' => 'required',
+            'idNumber' => 'nullable|string',
+            'idType' => 'nullable|string',
+            'firstName' => 'nullable|string',
+            'lastName' => 'nullable|string',
+            'phoneNumber' => 'nullable|string',
+            'city' => 'nullable|string',
+            'state' => 'nullable|string',
+            'country' => 'nullable|string',
+            'zipCode' => 'nullable|string',
+            'street' => 'nullable|string',
+            'additionalInfo' => 'nullable|string',
+            'houseNumber' => 'nullable|string',
+            'verificationDocument' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return get_error_response(['error' => $validator->errors()], 422);
+        }
+
+        // Get the authenticated user
+        $user = Auth::user();
+
+        // Update the user's profile
+        $user->update([
+            'name' => $request->input('name'),
+            'business_name' => $request->input('businessName'),
+            'id_number' => $request->input('idNumber'),
+            'id_type' => $request->input('idType'),
+            'first_name' => $request->input('firstName'),
+            'last_name' => $request->input('lastName'),
+            'phone_number' => $request->input('phoneNumber'),
+            'city' => $request->input('city'),
+            'state' => $request->input('state'),
+            'country' => $request->input('country'),
+            'zip_code' => $request->input('zipCode'),
+            'street' => $request->input('street'),
+            'additional_info' => $request->input('additionalInfo'),
+            'house_number' => $request->input('houseNumber'),
+            'verification_document' => $request->input('verificationDocument'),
+        ]);
+
+        // You can customize the response as needed
+        return get_success_response(['message' => 'Profile updated successfully', 'user' => $user]);
+    }
 }
