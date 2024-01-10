@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ProfileRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -170,31 +171,8 @@ class AuthController extends Controller
         return get_error_response(['error' => 'Invalid OTP'], 422);
     }
 
-    public function updateProfile(Request $request)
+    public function updateProfile(ProfileRequest $request)
     {
-        // Validate the incoming request data
-        $validator = Validator::make($request->all(), [
-            'name' => 'required',
-            'businessName' => 'required',
-            'idNumber' => 'nullable|string',
-            'idType' => 'nullable|string',
-            'firstName' => 'nullable|string',
-            'lastName' => 'nullable|string',
-            'phoneNumber' => 'nullable|string',
-            'city' => 'nullable|string',
-            'state' => 'nullable|string',
-            'country' => 'nullable|string',
-            'zipCode' => 'nullable|string',
-            'street' => 'nullable|string',
-            'additionalInfo' => 'nullable|string',
-            'houseNumber' => 'nullable|string',
-            'verificationDocument' => 'nullable|string',
-        ]);
-
-        if ($validator->fails()) {
-            return get_error_response(['error' => $validator->errors()], 422);
-        }
-
         // Get the authenticated user
         $user = Auth::user();
 
