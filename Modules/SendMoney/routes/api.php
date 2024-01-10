@@ -15,7 +15,7 @@ use Modules\SendMoney\app\Http\Controllers\SendMoneyController;
     | 
 */
 
-Route::middleware(['auth:sanctum'])->prefix('v1/sendmoney')->name('api.')->as('sendmoney.')->group(function () {
+Route::middleware(['auth:api'])->prefix('v1/sendmoney')->name('api.')->as('sendmoney.')->group(function () {
     // Route::get('sendmoney', fn (Request $request) => $request->user())->name('sendmoney');
     Route::get('gateways',  [SendMoneyController::class, 'gateways'])->name('gateways');
     Route::post('quote',    [SendMoneyController::class, 'create_quote'])->name('quote');

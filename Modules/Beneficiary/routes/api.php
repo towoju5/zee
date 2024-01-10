@@ -15,7 +15,7 @@ use Modules\Beneficiary\app\Http\Controllers\BeneficiaryController;
     |
 */
 
-Route::middleware(['auth:sanctum'])->prefix('v1')->name('api.')->group(function () {
+Route::middleware(['auth:api'])->prefix('v1')->name('api.')->group(function () {
     Route::get('beneficiary', fn (Request $request) => $request->user())->name('beneficiary');
     Route::get('beneficiaries', [BeneficiaryController::class, 'index']);
     Route::post('beneficiaries', [BeneficiaryController::class, 'store']);

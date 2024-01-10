@@ -3,11 +3,14 @@
 namespace Modules\BinancePay\app\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Balance;
 use App\Models\Deposit;
 use App\Models\Transaction;
+use App\Models\Withdraw;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Http;
 
 class BinancePayController extends Controller
 {
@@ -122,8 +125,8 @@ class BinancePayController extends Controller
                     $order->save();
                     if ($deposit->save()) {
                         // \Log::info($rechargeAmount);
-                        $user__balance = Balance::where(["user_id" => $userId, "ticker_name" => "USDT"])->first();
-                        $save = $user__balance->increment('balance', $rechargeAmount);
+                        // $user__balance = Balance::where(["user_id" => $userId, "ticker_name" => "USDT"])->first();
+                        // $save = $user__balance->increment('balance', $rechargeAmount);
                         // \Log::error($save);
                     }
                 }
@@ -228,7 +231,7 @@ class BinancePayController extends Controller
         }
     }
 
-    public function api_call(string $url, string $method, array $request = [])
+    private function api_call(string $url, string $method, array $request = [])
     {
         // Generate nonce string
         $chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -270,7 +273,7 @@ class BinancePayController extends Controller
     public function get_rate()
     {
         $endpoint = "api/v3/avgPrice";
-        $url = "https://api.binance.com/$endpoint?" . build_query([
+        $url = "https://api.binance.com/$endpoint?".http_build_query([
             'symbol' => "BTCUSDT",
         ]);
         $request = Http::get($url)->toJson();

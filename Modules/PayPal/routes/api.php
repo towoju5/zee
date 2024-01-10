@@ -15,7 +15,7 @@ use Modules\PayPal\app\Http\Controllers\PayPalDepositController;
     |
 */
 
-Route::middleware(['auth:sanctum'])->prefix('v1')->name('api.')->group(function () {
+Route::middleware(['auth:api'])->prefix('v1')->name('api.')->group(function () {
     Route::get('paypal', fn (Request $request) => $request->user())->name('paypal');
     
     Route::post('paypal/deposit', [PayPalDepositController::class, 'createOrder'])->name('createOrder');

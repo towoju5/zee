@@ -14,6 +14,6 @@ use Illuminate\Support\Facades\Route;
     |
 */
 
-Route::middleware(['auth:sanctum'])->prefix('v1')->name('api.')->group(function () {
+Route::middleware(['auth:api'])->prefix('v1')->name('api.')->group(function () {
     Route::get('monnify', fn (Request $request) => $request->user())->name('monnify');
 });

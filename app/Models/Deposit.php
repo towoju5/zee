@@ -20,4 +20,18 @@ class Deposit extends Model
         'payment_gateway_id',
         'meta',
     ];
+    
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array<int, string>
+     */
+    protected $hidden = [
+        'deleted_at'
+    ];
+
+    public function transaction()
+    {
+        return $this->hasMany(Transaction::class);
+    }
 }

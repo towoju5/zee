@@ -15,7 +15,7 @@ use Modules\Bitnob\app\Http\Controllers\BitnobController;
     |
 */
 
-Route::middleware(['auth:sanctum'])->prefix('v1')->name('api.')->group(function () {
+Route::middleware(['auth:api'])->prefix('v1')->name('api.')->group(function () {
     Route::get('bitnob', fn (Request $request) => $request->user())->name('bitnob');    
     Route::post('bitnob/reg-user',              [BitnobController::class, 'reg_user']);
     Route::post('bitnob/create-card',           [BitnobController::class, 'createCard']);
