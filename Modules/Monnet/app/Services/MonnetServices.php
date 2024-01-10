@@ -1,5 +1,4 @@
 <?php
-
 namespace Modules\Monnet\Services;
 
 use Illuminate\Http\Request;
@@ -8,20 +7,6 @@ use Modules\Beneficiary\app\Models\Beneficiary;
 
 class MonnetServices
 {
-    public function __construct()
-    {
-        //
-    }
-
-    public function makePayment()
-    {
-        try {
-            //code...
-        } catch (\Throwable $th) {
-            //throw $th;
-        }
-    }
-
     public function payout($beneficiaryId)
     {
         try {

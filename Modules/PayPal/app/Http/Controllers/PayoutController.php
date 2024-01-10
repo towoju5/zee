@@ -8,7 +8,7 @@ use Modules\SendMoney\app\Models\SendQuote;
 use PayPal\Auth\OAuthTokenCredential;
 use PayPal\Rest\ApiContext;
 use PaypalPayoutsSDK\Payouts\PayoutsPostRequest;
-use Sample\PayPalClient;
+// use Sample\PayPalClient;
 
 class PayoutController extends Controller
 {

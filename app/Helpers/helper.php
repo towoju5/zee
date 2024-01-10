@@ -39,7 +39,7 @@ if (!function_exists('to_array')) {
     }
 }
 
-if (function_exists('isApi')) {
+if (!function_exists('isApi')) {
     function isApi()
     {
         if (request()->is('api/*')) {
@@ -48,14 +48,14 @@ if (function_exists('isApi')) {
     }
 }
 
-if (function_exists('smart_sms')) {
+if (!function_exists('smart_sms')) {
     function smart_sms($message, $phoneNumber)
     {
         return true;
     }
 }
 
-if (function_exists('_date')) {
+if (!function_exists('_date')) {
     function _date($date)
     {
         return $date->format('M. d, Y');
@@ -86,7 +86,7 @@ if (!function_exists('settings')) {
     }
 }
 
-if (function_exists('get_current_balance')) {
+if (!function_exists('get_current_balance')) {
     function get_current_balance($currency)
     {
         // return true;
@@ -94,7 +94,7 @@ if (function_exists('get_current_balance')) {
     }
 }
 
-if (function_exists('get_fees')) {
+if (!function_exists('get_fees')) {
     function get_fees($currency1, $amount, $currency2)
     {
         // return true;
@@ -102,7 +102,7 @@ if (function_exists('get_fees')) {
     }
 }
 
-if (function_exists('getExchangeVal')) {
+if (!function_exists('getExchangeVal')) {
     /**
      * Get and return the exchange rate
      */
@@ -113,7 +113,7 @@ if (function_exists('getExchangeVal')) {
     }
 }
 
-if (function_exists('gateways')) {
+if (!function_exists('gateways')) {
     /**
      * @param string $slug
      * @return boolean
@@ -125,7 +125,7 @@ if (function_exists('gateways')) {
     }
 }
 
-if (function_exists('get_success_response')) {
+if (!function_exists('get_success_response')) {
     function get_success_response($data, $status_code = 200)
     {
         $response = [
@@ -134,20 +134,21 @@ if (function_exists('get_success_response')) {
             'message' =>  'Request successful',
             'data' =>  $data
         ];
-
+        // return $response;
         return response()->json($response);
     }
 }
 
-if (function_exists('get_error_response')) {
+if (!function_exists('get_error_response')) {
     function get_error_response($data, $status_code = 400)
     {
-        return [
+        $response = [
             'status' => 'failed',
             'status_code' => $status_code,
             'message' =>  'Request failed',
             'data' =>  $data
         ];
+        return response()->json($response);
     }
 }
 
