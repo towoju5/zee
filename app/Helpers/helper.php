@@ -2,6 +2,7 @@
 
 use App\Models\settings;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 if (!function_exists('user_can')) {
@@ -354,5 +355,20 @@ if (!function_exists('monnet_error_code')) {
         ];
 
         return $errorMessages[$code] ?? "Error code not found";
+    }
+}
+
+
+if(!function_exists('sendOtpEmail')) {
+    function sendOtpEmail($email, $otp)
+    {
+        // Customize the email content as needed
+        $subject = 'Verification OTP';
+        $message = "Your OTP verification code is: $otp";
+
+        // Send the email
+        Mail::raw($message, function ($message) use ($email, $subject) {
+            $message->to($email)->subject($subject);
+        });
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\MiscController;
 use App\Http\Controllers\UserMetaController;
 use App\Http\Controllers\WalletController;
 use Illuminate\Http\Request;
@@ -19,6 +21,18 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+
+Route::group(['prefix'  => 'v1/auth'], function(){
+    Route::post('register', [AuthController::class, 'register']);
+    Route::post('login', [AuthController::class, 'login']);
+    Route::post('send-verification-otp', [AuthController::class, 'sendVerificationOtp']);
+    Route::post('verify-otp', [MiscController::class, 'verifyOtp']);
+
+    Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
+    Route::post('reset-password-with-otp', [AuthController::class, 'resetPasswordWithOtp']);
+});
+
 
 
 Route::middleware(['auth:api'])->prefix('v1')->name('api.')->group(function () {
