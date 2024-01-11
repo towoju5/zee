@@ -24,6 +24,15 @@ class SendMoneyController extends Controller
 			get_error_response(['error'  => $th->getMessage()]);
 		}
     }
+    public function get_quote($id)
+    {
+        try {
+			$quotes = SendQuote::whereUserId(active_user())->whereId($id)->first();
+			return get_success_response($quotes);
+		} catch (\Throwable $th) {
+			get_error_response(['error'  => $th->getMessage()]);
+		}
+    }
 
 	public function gateways(Request $request)
 	{
