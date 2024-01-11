@@ -25,15 +25,22 @@ class AuthController extends Controller
             return get_error_response(['error' => $validator->errors()], 422);
         }
 
-        // Attempt to log in the user
-        $credentials = $request->only('email', 'password');
-
-        if (!$token = Auth::attempt($credentials)) {
-            return get_error_response(['error' => 'Unauthorized'], 401);
+        $credentials = ['email' => $request->email, 'password' => $request->password];
+        $token = auth()->attempt($credentials);
+        if ($token === false) {
+            return response()->json(['error' => 'Unauthorized'], 401);
         }
-
-        // If login successful, return the token
         return $this->respondWithToken($token);
+    }
+
+    /**
+     * Refresh a token.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function refresh()
+    {
+        return $this->respondWithToken(auth()->refresh());
     }
 
     protected function respondWithToken($token)
@@ -75,7 +82,7 @@ class AuthController extends Controller
         // Create a new user
         $user = User::create([
             'name' => $request->input('name'),
-            'business_name' => $request->input('businessName'),
+            'bussinessName' => $request->input('businessName'),
             'id_number' => $request->input('idNumber'),
             'id_type' => $request->input('idType'),
             'first_name' => $request->input('firstName'),
@@ -88,7 +95,7 @@ class AuthController extends Controller
             'street' => $request->input('street'),
             'additional_info' => $request->input('additionalInfo'),
             'house_number' => $request->input('houseNumber'),
-            'verification_document' => save_image('customer-documents', $request->input('verificationDocument')),
+            'verification_document' => save_image('customer-documents', $request->input('verificationDocument')) ?? null,
             'email' => $request->input('email'),
             'password' => bcrypt($request->input('password')),
         ]);

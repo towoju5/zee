@@ -190,12 +190,14 @@ if (!function_exists('uuid')) {
 if (!function_exists('save_image')) {
     function save_image($path, $image)
     {
-        $image_path = '/storage/' . $path;
-        $name = rand(1009, 9999999) . time() . '.jpg';
-        $destinationPath = public_path($image_path);
-        $image->move($destinationPath, $name);
-        $paths = "$image_path/$name";
-        return asset($paths);
+        if(!empty($image) and is_file($image)){
+            $image_path = '/storage/' . $path;
+            $name = rand(1009, 9999999) . time() . '.jpg';
+            $destinationPath = public_path($image_path);
+            $image->move($destinationPath, $name);
+            $paths = "$image_path/$name";
+            return asset($paths);
+        }
     }
 }
 
@@ -310,10 +312,10 @@ if (!function_exists('get_commision')) {
 if (!function_exists('active_user')) {
     function active_user()
     {
-        if (auth() && active_user()) {
-            return active_user();
+        if (auth()->check()) {
+            return auth()->id();
         }
-        return active_user();
+        return false;
     }
 }
 

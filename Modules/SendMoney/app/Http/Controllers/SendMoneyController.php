@@ -15,9 +15,14 @@ use Modules\SendMoney\app\Notifications\SendMoneyQuoteNotification;
 
 class SendMoneyController extends Controller
 {
-    public function currencies()
+    public function get_quotes()
     {
-        //
+        try {
+			$quotes = SendQuote::whereUserId(active_user())->paginate(10);
+			return get_success_response($quotes);
+		} catch (\Throwable $th) {
+			get_error_response(['error'  => $th->getMessage()]);
+		}
     }
 
 	public function gateways(Request $request)
@@ -56,8 +61,9 @@ class SendMoneyController extends Controller
 				'receive_gateway'	=>	'required',
 				'send_currency'		=>	'required',
 				'receive_currency' 	=>	'required',
-				'transfer_purpose' 	=>	'required',
+				'transfer_purpose' 	=>	'sometimes',
 			]);
+
 
 			$user = User::find(active_user());
 			$validate['rate'] = null;
@@ -66,11 +72,15 @@ class SendMoneyController extends Controller
 			$validate['raw_data'] = $request->all();
 
 			// calulate quote fees
-			
+			if(SendQuote::get()->count() < 1) {
+				$validate['id'] = '2111';
+			}
+
+			// return $validate;
 			if($send = SendQuote::create($validate)){
 				// add transaction history
-				@dispatch(new SendMoneyQuoteNotification($send, 'send_money'));
-				$user->notify(new SendMoneyNotification($send));
+				// @dispatch(new SendMoneyQuoteNotification($send, 'send_money'));
+				// @$user->notify(new SendMoneyNotification($send));
 				return get_success_response($validate);
 			}
 			return get_error_response(['error' => 'Unable to process send request please contact support']);
@@ -81,7 +91,7 @@ class SendMoneyController extends Controller
 
 	public function send_money(Request $request)
 	{
-		try {
+		try { 
 			$validate  = $request->validate([
 				'quote_id' 	=> 'required'
 			]);

@@ -23,7 +23,7 @@ class ProfileRequest extends FormRequest
     {
         return [
             'name' => 'required',
-            'businessName' => 'required',
+            'businessName' => 'required',  
             'idNumber' => 'nullable|string',
             'idType' => 'nullable|string',
             'firstName' => 'nullable|string',
