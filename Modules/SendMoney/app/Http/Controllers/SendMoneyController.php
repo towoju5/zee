@@ -54,9 +54,9 @@ class SendMoneyController extends Controller
 	{
 		try {
 			$validate  = $request->validate([
-				'action' 	=> 'required',
-				'send_amount' 		=> 'required',
-				'receive_amount' 	=> 'required',
+				'action' 			=> 	'required',
+				'send_amount' 		=> 	'required',
+				'receive_amount' 	=> 	'required',
 				'send_gateway'		=>	'required',
 				'receive_gateway'	=>	'required',
 				'send_currency'		=>	'required',

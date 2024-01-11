@@ -14,18 +14,20 @@ return new class extends Migration
         Schema::create('send_quotes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users');
-            $table->string('action');
-            $table->string('send_amount');
-            $table->string('receive_amount');
-            $table->string('send_gateway');
-            $table->string('receive_gateway');
-            $table->string('send_currency');
-            $table->string('receive_currency');
-            $table->string('transfer_purpose');
-            $table->string('rate');
-            $table->string('total_amount');
+            $table->string('action')->nullable();
+            $table->string('send_amount')->nullable();
+            $table->string('receive_amount')->nullable();
+            $table->string('send_gateway')->nullable();
+            $table->string('receive_gateway')->nullable();
+            $table->string('send_currency')->nullable();
+            $table->string('receive_currency')->nullable();
+            $table->string('transfer_purpose')->nullable();
+            $table->string('rate')->nullable();
+            $table->string('total_amount')->nullable();
             $table->json('raw_data')->nullable();
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
+            $table->timestamp('deleted_at')->nullable();
         });
     }
 
