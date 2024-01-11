@@ -18,6 +18,7 @@ use Modules\SendMoney\app\Http\Controllers\SendMoneyController;
 Route::middleware(['auth:api'])->prefix('v1/sendmoney')->name('api.')->as('sendmoney.')->group(function () {
     // Route::get('sendmoney', fn (Request $request) => $request->user())->name('sendmoney');
     Route::get('gateways',  [SendMoneyController::class, 'gateways'])->name('gateways');
+    Route::get('quote',     [SendMoneyController::class, 'get_quotes'])->name('get.quote');
     Route::post('quote',    [SendMoneyController::class, 'create_quote'])->name('quote');
     Route::post('/',        [SendMoneyController::class, 'send_money'])->name('process');
 });

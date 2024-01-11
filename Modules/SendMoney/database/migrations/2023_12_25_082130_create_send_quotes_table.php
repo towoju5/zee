@@ -23,7 +23,6 @@ return new class extends Migration
             $table->string('receive_currency');
             $table->string('transfer_purpose');
             $table->string('rate');
-            $table->string('user_id');
             $table->string('total_amount');
             $table->json('raw_data')->nullable();
             $table->timestamps();
