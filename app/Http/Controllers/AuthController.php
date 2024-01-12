@@ -10,8 +10,9 @@ use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
+use Laravel\Fortify\Contracts\UpdatesUserProfileInformation;
 
-class AuthController extends Controller
+class AuthController extends Controller implements UpdatesUserProfileInformation
 {
     public function login(Request $request)
     {
@@ -178,29 +179,42 @@ class AuthController extends Controller
         return get_error_response(['error' => 'Invalid OTP'], 422);
     }
 
-    public function updateProfile(ProfileRequest $request)
+    public function profile(Request $request)
     {
-        // Get the authenticated user
-        $user = Auth::user();
+        try {
+            $profile = $request->user();
+            return get_success_response($profile);
+        } catch (\Throwable $th) {
+            return get_error_response(['error' => $th->getMessage()]);
+        }
+    }
 
-        // Update the user's profile
+    public function update(ProfileRequest $request, User $user)
+    {
         $user->update([
-            'name' => $request->input('name'),
-            'business_name' => $request->input('businessName'),
-            'id_number' => $request->input('idNumber'),
-            'id_type' => $request->input('idType'),
-            'first_name' => $request->input('firstName'),
-            'last_name' => $request->input('lastName'),
-            'phone_number' => $request->input('phoneNumber'),
-            'city' => $request->input('city'),
-            'state' => $request->input('state'),
-            'country' => $request->input('country'),
-            'zip_code' => $request->input('zipCode'),
-            'street' => $request->input('street'),
-            'additional_info' => $request->input('additionalInfo'),
-            'house_number' => $request->input('houseNumber'),
-            'verification_document' => $request->input('verificationDocument'),
+            "name"          =>  $request->name,
+            "bussinessName" =>  $request->bussinessName,
+            "firstName"     =>  $request->firstName,
+            "lastName"      =>  $request->lastName,
+            "phoneNumber"   =>  $request->phoneNumber,
+            "city"          =>  $request->city,
+            "state"         =>  $request->state,
+            "country"       =>  $request->country,
+            "zipCode"       =>  $request->zipCode,
+            "street"        =>  $request->street,
+            "additionalInfo"=>  $request->additionalInfo,
+            "houseNumber"   =>  $request->houseNumber,
+            "idNumber"      =>  $request->idNumber,
+            "idType"        =>  $request->idType,
+            "idIssuedAt"    =>  $request->idIssuedAt,
+            "idExpiryDate"  =>  $request->idExpiryDate,
+            "idIssueDate"   =>  $request->idIssueDate,
+            "verificationDocument"  =>  $request->verificationDocument,
         ]);
+
+        if (isset($input['photo'])) {
+            $user->updateProfilePhoto($input['photo']);
+        }
 
         // You can customize the response as needed
         return get_success_response(['message' => 'Profile updated successfully', 'user' => $user]);

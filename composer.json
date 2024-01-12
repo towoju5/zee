@@ -23,6 +23,7 @@
         "tymon/jwt-auth": "^2.0"
     },
     "require-dev": {
+        "dipeshsukhia/laravel-country-state-city-data": "^2.0",
         "fakerphp/faker": "^1.9.1",
         "laravel/pint": "^1.0",
         "laravel/sail": "^1.18",

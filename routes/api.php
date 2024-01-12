@@ -22,6 +22,12 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+Route::group(['prefix'  => 'v1/locations'], function(){
+    Route::get('countries',         [MiscController::class, 'countries'])->name('countries');
+    Route::get('states',            [MiscController::class, 'states'])->name('states');
+    Route::get('states/{countryId}',[MiscController::class, 'states'])->name('state');
+    Route::get('cities/{stateId}',  [MiscController::class, 'city'])->name('cities');
+});
 
 Route::group(['prefix'  => 'v1/auth'], function(){
     Route::post('register', [AuthController::class, 'register']);
@@ -36,7 +42,8 @@ Route::group(['prefix'  => 'v1/auth'], function(){
 
 
 Route::middleware(['auth:api'])->prefix('v1')->name('api.')->group(function () {
-    Route::put('update-profile', [AuthController::class, 'updateProfile']);
+    Route::put('profile', [AuthController::class, 'update']);
+    Route::get('profile', [AuthController::class, 'profile']);
 
     Route::get('user-meta', [UserMetaController::class, 'index']);
     Route::get('user-meta/{id}', [UserMetaController::class, 'show']);

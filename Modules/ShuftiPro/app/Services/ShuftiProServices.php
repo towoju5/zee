@@ -20,7 +20,7 @@ class ShuftiProServices
                 "reference"             => uuid(),            //your unique request reference
                 "callback_url"          => "https://zeenahapp.azurewebsites.net/shufti-pro/callback/$user->id",         //URL where you will receive the webhooks from Shufti Pro
                 "email"                 => $user->email,           //end-user email
-                "country"               => $user->country ?? null,          //end-user country
+                "country"               => get_iso2($user->country) ?? null,          //end-user country
                 "language"              => "EN",            //select ISO2 code for your desired language on verification screen
                 "redirect_url"          => "https://voubeta.com",           //URL where end-user will be redirected after verification completed
                 "verification_mode"     => "any",           //what kind of proofs will be provided to Shufti Pro for verification?

@@ -361,7 +361,6 @@ if (!function_exists('monnet_error_code')) {
     }
 }
 
-
 if(!function_exists('sendOtpEmail')) {
     function sendOtpEmail($email, $otp)
     {
@@ -373,5 +372,16 @@ if(!function_exists('sendOtpEmail')) {
         Mail::raw($message, function ($message) use ($email, $subject) {
             $message->to($email)->subject($subject);
         });
+    }
+}
+
+if(!function_exists('get_iso2')) {
+    /**
+     * @return country 2 codes identifier
+     */
+    function get_iso2($country)
+    {
+        // $country = Country::whereUuid($country);
+        // return $country-->iso2;
     }
 }
