@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Modules\ShuftiPro\app\Http\Controllers\ShuftiProController;
 
 /*
     |--------------------------------------------------------------------------
@@ -16,4 +17,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:api'])->prefix('v1')->name('api.')->group(function () {
     Route::get('shuftipro', fn (Request $request) => $request->user())->name('shuftipro');
+
+    Route::post("user-verification", [ShuftiProController::class, ''])
 });

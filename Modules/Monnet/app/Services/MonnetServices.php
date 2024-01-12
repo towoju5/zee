@@ -33,6 +33,7 @@ class MonnetServices
         try {
             $request = request();
             $user = $request->user();
+            $txn = uuid();
             $data = [
                 'payinMerchantID' => '00',
                 'payinAmount' => $amount,
@@ -44,34 +45,34 @@ class MonnetServices
                 'payinCustomerLastName' => $user->lastName,
                 'payinCustomerEmail' => $user->email,
                 'payinCustomerPhone' => $user->phoneNumber,
-                'payinCustomerTypeDocument' => 'DNI',
-                'payinCustomerDocument' => '00000000',
+                'payinCustomerTypeDocument' => $user->idType,
+                'payinCustomerDocument' => $user->idNumber,
                 'payinRegularCustomer' => $user->name,
                 'payinCustomerID' => $user->id,
-                'payinDiscountCoupon' => 'string',
+                'payinDiscountCoupon' => null,
                 'payinLanguage' => 'EN',
-                'payinExpirationTime' => '000',
-                'payinDateTime' => date('YYYY-MM-DD'),
-                'payinTransactionOKURL' => 'https://test.com',
-                'payinTransactionErrorURL' => 'https://test.com',
+                'payinExpirationTime' => now()->addMinutes(60),
+                'payinDateTime' => now(),
+                'payinTransactionOKURL' => route("callback/monnet/success/$user->id/$txn"),
+                'payinTransactionErrorURL' => route("callback/monnet/failed/$user->id/$txn"),
                 'payinFilterBy' => 'string',
-                'payinCustomerAddress' => 'string',
-                'payinCustomerCity' => 'string',
-                'payinCustomerRegion' => 'string',
-                'payinCustomerCountry' => 'Peru',
-                'payinCustomerZipCode' => '0000',
-                'payinCustomerShippingName' => 'string',
-                'payinCustomerShippingPhone' => '0000',
-                'payinCustomerShippingAddress' => 'string',
-                'payinCustomerShippingCity' => 'string',
-                'payinCustomerShippingRegion' => 'string',
-                'payinCustomerShippingCountry' => 'Peru',
-                'payinCustomerShippingZipCode' => '0000',
-                'payinProductID' => '0000',
-                'payinProductDescription' => 'string',
-                'payinProductAmount' => '0000',
-                'payinProductSku' => 'string',
-                'payinProductQuantity' => '0000',
+                'payinCustomerAddress' => $user->street,
+                'payinCustomerCity' => $user->city,
+                'payinCustomerRegion' => $user->state,
+                'payinCustomerCountry' => $user->country,
+                'payinCustomerZipCode' => $user->zipCode,
+                'payinCustomerShippingName' => $user->name,
+                'payinCustomerShippingPhone' => $user->phoneNumber,
+                'payinCustomerShippingAddress' => $user->street,
+                'payinCustomerShippingCity' => $user->city,
+                'payinCustomerShippingRegion' => $user->state,
+                'payinCustomerShippingCountry' => $user->country,
+                'payinCustomerShippingZipCode' => $user->zipCode,
+                'payinProductID' => $txn,
+                'payinProductDescription' => 'Wallet top up on '.getenv('APP_NAME'),
+                'payinProductAmount' => $amount,
+                'payinProductSku' => $txn,
+                'payinProductQuantity' => 1,
                 'URLMonnet' => 'https://cert.monnetpayments.com/api-payin/v1/online-payments',
                 'typePost' => 'json',
             ];
@@ -89,7 +90,7 @@ class MonnetServices
             'amount' => $request->amount,
             'currency' => $request->currency,
             'orderId' => uuid(),
-            'description' => $request->description,
+            'description' => $request->description ?? "Payout from ".getenv('APP_NAME'),
             'beneficiary' => [
                 "customerId" => $customer->id,
                 "userName" => $customer->name,
@@ -163,4 +164,7 @@ class MonnetServices
         curl_close($ch);
         echo $response;
     }
+
+    public function webhook(Request $request)
+    {}
 }

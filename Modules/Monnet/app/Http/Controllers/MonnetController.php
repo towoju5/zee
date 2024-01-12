@@ -9,59 +9,13 @@ use Illuminate\Http\Response;
 
 class MonnetController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function payin_webhook(Request $request)
     {
-        return view('monnet::index');
+        return http_response_code(200);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function payout_webhook(Request $request)
     {
-        return view('monnet::create');
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request): RedirectResponse
-    {
-        //
-    }
-
-    /**
-     * Show the specified resource.
-     */
-    public function show($id)
-    {
-        return view('monnet::show');
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit($id)
-    {
-        return view('monnet::edit');
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id): RedirectResponse
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id)
-    {
-        //
+        return http_response_code(200);
     }
 }

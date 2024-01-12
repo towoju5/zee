@@ -16,4 +16,6 @@ use Modules\Monnet\app\Http\Controllers\MonnetController;
 
 Route::group([], function () {
     Route::resource('monnet', MonnetController::class)->names('monnet');
+    Route::post("webhook/monnet/payin",     [MonnetController::class, 'payin_webhook']);
+    Route::post("webhook/monnet/payout",    [MonnetController::class, 'payout_webhook']);
 });

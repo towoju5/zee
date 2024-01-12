@@ -11,87 +11,85 @@ class ShuftiProServices
     public function init(Request $request)
     {
         try {
-            $customer = User::finf(active_user());
+            //Shufti Pro API base URL
             $url = 'https://api.shuftipro.com/';
- 
-            $client_id  = getenv('SHUFTI_PRO_CLIENT_ID');
+            $client_id    = getenv('SHUFTI_PRO_CLIENT_ID');
             $secret_key = getenv('SHUFTI_PRO_SECRET_KEY');
-
+            $user = User::find(active_user());
             $verification_request = [
-                'reference'    => strtoupper(Str::random(8)),
-                'country'      => $customer->country,
-                'language'     => 'EN',
-                'email'        => $customer->email,
-                'callback_url' =>  'route()',
-                'verification_mode' => 'any',
-                'ttl'           => 60,
+                "reference"             => $user->id,            //your unique request reference
+                "callback_url"          => "https://zeenahapp.azurewebsites.net/shufti-pro/callback/$user->id",         //URL where you will receive the webhooks from Shufti Pro
+                "email"                 => $user->email,           //end-user email
+                "country"               => $user->country ?? null,          //end-user country
+                "language"              => "EN",            //select ISO2 code for your desired language on verification screen
+                "redirect_url"          => "https://voubeta.com",           //URL where end-user will be redirected after verification completed
+                "verification_mode"     => "any",           //what kind of proofs will be provided to Shufti Pro for verification?
+                "allow_offline"         => "0",         //allow end-user to upload verification proofs if the webcam is not accessible
+                "allow_online"          => "1",         //allow end-user to upload real-time or already catured proofs
+                "show_privacy_policy"   => "1",            //privacy policy screen will be shown to end-user
+                "show_results"          => "1",            //verification results screen will be shown to end-user
+                "show_consent"          => "1",            //consent screen will be shown to end-user
+                "show_feedback_form"    => "0"         //User cannot send Feedback
             ];
-
+            //face onsite verification
+            $verification_request['face'] = [];
+            //document onsite verification with OCR
             $verification_request['document'] = [
-                'proof' => '',
-                'additional_proof' => '',
-                'name' => '',
-                'dob'             => $customer->dob,
-                'age'             => $customer->age,
-                'document_number' => '',
-                'expiry_date'     => '',
-                'issue_date'      => '',
-                'allow_offline'      => '1',
-                'allow_online'     => '1',
-                'supported_types' => ['id_card', 'passport'],
-                'gender'   => $customer->gender
+                'dob'                   => $user->dob,
+                'gender'                => $user->gender,
+                'place_of_issue'        => $user->idIssuedAt,
+                'document_number'       => $user->idNumber,
+                'expiry_date'           => $user->idExpiryDate,
+                'issue_date'            => $user->idIssueDate,
+                'fetch_enhanced_data'   => "1",
+                'supported_types'       => ['id_card', 'passport']
             ];
-
-            $verification_request['address'] = [
-                'proof' => $customer->addressProof,
-                'name' => $customer->name,
-                'full_address'    => $customer->address,
-                'address_fuzzy_match' => '1',
-                'issue_date' => '',
-                'supported_types' => ['utility_bill', 'passport', 'bank_statement']
-            ];
-
-            $auth = $client_id . ":" . $secret_key;
-            $headers = ['Content-Type: application/json'];
-
-            $post_data = json_encode($verification_request);
-            $response = self::api_call($url, $post_data, $headers, $auth);
-            $response_data    = $response['body'];
-            $exploded = explode(" ", $response['headers']);
-            $sp_signature = null;
-            foreach ($exploded as $key => $value) {
-                if (strpos($value, 'signature: ') !== false || strpos($value, 'Signature: ') !== false) {
-                    $sp_signature = trim(explode(':', $exploded[$key])[1]);
-                    break;
-                }
-            }
-
-            $calculate_signature  = hash('sha256', $response_data . $secret_key);
+            $auth       = $client_id . ":" . $secret_key;
+            $headers    = ['Content-Type: application/json'];
+            $post_data  = json_encode($verification_request);
+            $response   = self::api_call($url, $post_data, $headers, $auth);
+            $response_data  = $response['body'];
+            $sp_signature   = self::get_header_keys($response['headers'])['signature'];
+            $calculate_signature = hash('sha256', $response_data . hash('sha256', $secret_key));
             $decoded_response = json_decode($response_data, true);
-            $event_name = $decoded_response['event'];
 
-            if ($event_name == 'request.pending') {
-                if ($sp_signature == $calculate_signature) {
-                    $verification_url = $decoded_response['verification_url'];
-                    return ["error" =>  "Verification url :" . $verification_url];
-                } else {
-                    return ["error" => "Invalid signature :" . $response_data];
-                }
+            if ($sp_signature == $calculate_signature) {
+                return get_success_response([$response_data, $decoded_response]);
             } else {
-                return ["error" => $response_data];
+                echo "Invalid signature :	$response_data";
             }
         } catch (\Throwable $th) {
-            return ['error' => $th->getMessage()];
+            return get_error_response(['error' => $th->getMessage()]);
         }
     }
 
     public function callback(Request $request)
     {
         try {
-            //code...
+            if($request->has('event') && $request->event == "verification.accepted") {
+                return get_error_response(["status" => 'NYSC completed successfully']);
+            }
         } catch (\Throwable $th) {
-            return ['error' => $th->getMessage()];
+            return get_error_response(['error' => $th->getMessage()]);
         }
+    }
+
+    public function get_header_keys($header_string)
+    {
+        $headers = [];
+        $exploded = explode("\n", $header_string);
+        if (!empty($exploded)) {
+            foreach ($exploded as $key => $header) {
+                if (!$key) {
+                    $headers[] = $header;
+                } else {
+                    $header = explode(':', $header);
+                    $headers[trim($header[0])] = isset($header[1]) ? trim($header[1]) : "";
+                }
+            }
+        }
+
+        return $headers;
     }
 
     public function api_call($url, $post_data, $headers, $auth)

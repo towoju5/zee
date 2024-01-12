@@ -15,8 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('bussinessName');
-            $table->string('idNumber')->nullable();
-            $table->string('idType')->nullable();
             $table->string('firstName')->nullable();
             $table->string('lastName')->nullable();
             $table->string('phoneNumber')->nullable();
@@ -27,7 +25,14 @@ return new class extends Migration
             $table->string('street')->nullable();
             $table->string('additionalInfo')->nullable()->comment('Line 2 comment');
             $table->string('houseNumber')->nullable();
+            // ID verification docs
+            $table->string('idNumber')->nullable();
+            $table->string('idType')->nullable();
+            $table->string('idIssuedAt')->nullable();
+            $table->string('idExpiryDate')->nullable();
+            $table->string('idIssueDate')->nullable();
             $table->string('verificationDocument')->nullable();
+            // ID verification ends here
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
