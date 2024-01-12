@@ -17,7 +17,7 @@ class ShuftiProServices
             $secret_key = getenv('SHUFTI_PRO_SECRET_KEY');
             $user = User::find(active_user());
             $verification_request = [
-                "reference"             => $user->id,            //your unique request reference
+                "reference"             => uuid(),            //your unique request reference
                 "callback_url"          => "https://zeenahapp.azurewebsites.net/shufti-pro/callback/$user->id",         //URL where you will receive the webhooks from Shufti Pro
                 "email"                 => $user->email,           //end-user email
                 "country"               => $user->country ?? null,          //end-user country
