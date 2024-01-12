@@ -18,5 +18,6 @@ use Modules\ShuftiPro\app\Http\Controllers\ShuftiProController;
 Route::middleware(['auth:api'])->prefix('v1')->name('api.')->group(function () {
     Route::get('shuftipro', fn (Request $request) => $request->user())->name('shuftipro');
 
-    Route::post("user-verification", [ShuftiProController::class, ''])
+    Route::post("user-verification", [ShuftiProController::class, 'shuftiPro']);
+    Route::post("callback/webhook/", [ShuftiProController::class, 'webhook']);
 });

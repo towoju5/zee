@@ -67,7 +67,7 @@ class ShuftiProServices
     {
         try {
             if($request->has('event') && $request->event == "verification.accepted") {
-                return get_error_response(["status" => 'NYSC completed successfully']);
+                return get_error_response(["status" => 'Verification completed successfully']);
             }
         } catch (\Throwable $th) {
             return get_error_response(['error' => $th->getMessage()]);
