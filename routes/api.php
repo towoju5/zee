@@ -42,6 +42,8 @@ Route::group(['prefix'  => 'v1/auth'], function(){
 
 
 Route::middleware(['auth:api'])->prefix('v1')->name('api.')->group(function () {
+    Route::get('auth/refresh-token', [AuthController::class, 'refresh']);
+
     Route::put('profile', [AuthController::class, 'update']);
     Route::get('profile', [AuthController::class, 'profile']);
 

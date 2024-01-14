@@ -16,4 +16,5 @@ use Modules\Flutterwave\app\Http\Controllers\FlutterwaveController;
 
 Route::group([], function () {
     Route::resource('flutterwave', FlutterwaveController::class)->names('flutterwave');
+    Route::get("callback/flutterwave/deposit/{user_id}/{reference}", [FlutterwaveController::class, 'validatePayment'])->name("flutter.callback");
 });

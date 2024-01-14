@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Http;
 
 class BinancePayController extends Controller
 {
-    public function init($amount, $currency)
+    public function init(int $quoteId, float $amount, string $currency)
     {
         try {
             $trxId = uuid();
@@ -87,6 +87,7 @@ class BinancePayController extends Controller
 
                 Transaction::create($deposit_data);
                 
+                updateSendMoneyRawData($quoteId, $call);
                 return $call;
             } else {
                 return get_error_response(["error" => "Unable to initiate deposit action."]);

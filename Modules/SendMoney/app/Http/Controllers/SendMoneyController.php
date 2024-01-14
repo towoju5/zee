@@ -7,6 +7,7 @@ use App\Jobs\Transaction;
 use App\Models\Gateways;
 use App\Models\User;
 use App\Services\PaymentService;
+use App\Services\PayoutService;
 use Illuminate\Http\Request;
 use Modules\SendMoney\app\Models\SendMoney;
 use Modules\SendMoney\app\Models\SendQuote;
@@ -47,11 +48,11 @@ class SendMoneyController extends Controller
 			]);
 	
 			if($request->action == 'deliver_by') {
-				$gateways = Gateways::where('payout', true)->get();
+				$gateways = Gateways::where('payout', true)->whereJsonContains('supported_currencies', $request->currency)->get();
 			}
 	
 			if($request->action == 'pay_by') {
-				$gateways = Gateways::where('deposit', true)->get();
+				$gateways = Gateways::where('deposit', true)->whereJsonContains('supported_currencies', $request->currency)->get();
 			}
 			return get_success_response($gateways);
 		} catch (\Throwable $th) {
@@ -90,7 +91,7 @@ class SendMoneyController extends Controller
 				// add transaction history
 				// @dispatch(new SendMoneyQuoteNotification($send, 'send_money'));
 				// @$user->notify(new SendMoneyNotification($send));
-				return get_success_response($validate);
+				return get_success_response($send);
 			}
 			return get_error_response(['error' => 'Unable to process send request please contact support']);
 		} catch (\Throwable $th) {
@@ -108,13 +109,13 @@ class SendMoneyController extends Controller
 			$user = User::find(active_user());
 			$get_quote = SendQuote::whereId($request->quote_id)->first();
 			if($get_quote){
-				$validate['user_id'] = active_user();
+				// $validate['user_id'] = active_user();
 				$validate['status'] = 'pending';
 				if($send = SendMoney::create($validate)){
 					// add transaction history
-					dispatch(new Transaction($send, 'send_money'));
-					$user->notify(new SendMoneyNotification($send));
-					$paymentUrl = (new PaymentService())->makePayment($get_quote->amount, $get_quote->currency, $get_quote->gateway);
+					// dispatch(new Transaction($send, 'send_money'));
+					// $user->notify(new SendMoneyNotification($send));
+					$paymentUrl = (new PaymentService())->makePayment($send, $get_quote->send_gateway);
 					return get_success_response(['link' => $paymentUrl, 'quote' => $get_quote]);
 				}  
 				return get_error_response(['error' => 'Unable to process send request please contact support']);
@@ -128,7 +129,17 @@ class SendMoneyController extends Controller
 	public function complete_send_money($quoteId)
 	{
 		try {
-			
+			$send_money = SendMoney::whereQuoteId($quoteId)->first();
+			$send_money->status = 'successful';
+			$send_money->save();
+
+			$quote = SendQuote::whereId($quoteId)->first();
+			$quote->status = 'successful';
+			$quote->save();
+
+			// Inititate payout proccess
+			$payout  = new PayoutService();
+			$init_payout = $payout->makePayment($quoteId, $quote->receive_gateway);
 		} catch (\Throwable $th) {
 			//throw $th;
 		}

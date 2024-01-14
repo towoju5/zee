@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
+use Illuminate\Http\UploadedFile;
 use Laravel\Fortify\Contracts\UpdatesUserProfileInformation;
 
 class AuthController extends Controller implements UpdatesUserProfileInformation
@@ -209,12 +210,17 @@ class AuthController extends Controller implements UpdatesUserProfileInformation
             "idIssuedAt"    =>  $request->idIssuedAt,
             "idExpiryDate"  =>  $request->idExpiryDate,
             "idIssueDate"   =>  $request->idIssueDate,
-            "verificationDocument"  =>  $request->verificationDocument,
         ]);
 
-        if (isset($input['photo'])) {
-            $user->updateProfilePhoto($input['photo']);
+        if($request->has('verificationDocument')) {
+            $user->update([
+                'verificationDocument' => save_image("$request->name/document/", $request->verificationDocument)
+            ]);
         }
+
+        // if ($request->has('photo')) {
+        //     $user->updateProfilePhoto($request->photo);
+        // }
 
         // You can customize the response as needed
         return get_success_response(['message' => 'Profile updated successfully', 'user' => $user]);

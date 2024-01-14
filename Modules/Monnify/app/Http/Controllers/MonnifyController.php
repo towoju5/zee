@@ -14,13 +14,15 @@ class MonnifyController extends Controller
         $this->monnifyService = $monnifyService;
     }
 
-    public function createCheckout($amount, $currency)
+    public function createCheckout(int $quoteId, float $amount, string $currency)
     {
         $customerEmail = auth()->user()->email;
         $paymentReference = uuid(); 
 
         $checkoutUrl = $this->monnifyService->createCheckoutUrl($customerEmail, $amount, $paymentReference);
 
+        updateSendMoneyRawData($quoteId, $checkoutUrl);
+        return $response;
         // Redirect the user to the checkout URL
         return redirect($checkoutUrl);
     }

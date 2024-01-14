@@ -17,7 +17,7 @@ use Modules\PayPal\app\Providers\PayPalServiceProvider;
  * This class is responsible for generating 
  * deposit/checkout link for customers to make payment.
  */
-class PaymentService
+class PayoutService
 {
     const ACTIVE = true;
     /**

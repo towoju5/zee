@@ -3,80 +3,80 @@
 namespace Modules\PayPal\app\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use PayPalCheckoutSdk\Orders\OrdersCaptureRequest;
-use PayPalCheckoutSdk\Orders\OrdersCreateRequest;
-use PayPalHttp\HttpException;
+use GuzzleHttp\Client;
+use PayPalHttp\Environment;
+
+
 
 class PayPalDepositController extends Controller
 {
-    public function createOrder($amount=10, $currency="USD")
+    protected $client;
+    protected $paypalApiUrl;
+
+    public function __construct()
     {
-        $client = $this->getClient();
-
-        $request = new OrdersCreateRequest();
-        $request->prefer('return=representation');
-        $request->body = $this->buildRequestBody($currency, $amount);
-
-        try {
-            $response = $client->execute($request);
-
-            // Extract the approval URL
-            $approvalUrl = $response->result->links[1]->href;
-
-            return redirect($approvalUrl);
-        } catch (HttpException $e) {
-            // Handle errors
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
+        $this->client = new Client();
+        $this->paypalApiUrl = env('PAYPAL_ENVIRONMENT') === 'live'
+            ? 'https://api.paypal.com'
+            : 'https://api.sandbox.paypal.com';
     }
 
-    public function captureOrder(Request $request)
+    public function createOrder(int $quoteId, float $amount, string $currency)
     {
-        $client = $this->getClient();
+        // Get PayPal API credentials from the config
+        $clientId = config('paypal.client_id');
+        $secret = config('paypal.secret');
 
-        $request = new OrdersCaptureRequest($request->input('orderID'));
-
-        try {
-            $response = $client->execute($request);
-
-            // Handle the captured order response
-            return response()->json($response->result);
-        } catch (HttpException $e) {
-            // Handle errors
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
-    }
-
-    protected function buildRequestBody($currency, $amount)
-    {
-        // Customize this method to build your order request body
-        return [
-            // Add your order details here
-            'intent' => 'CAPTURE',
-            'application_context' => [
-                'brand_name' => config('app.name'),
-                'landing_page' => 'NO_PREFERENCE',
-                'user_action' => 'PAY_NOW',
+        // Step 1: Get Access Token
+        $response = $this->client->post("$this->paypalApiUrl/v1/oauth2/token", [
+            'headers' => [
+                'Accept' => 'application/json',
+                'Accept-Language' => 'en_US',
             ],
-            'purchase_units' => [
-                [
-                    'amount' => [
-                        'currency_code' => $currency,
-                        'value' => $amount,
+            'auth' => [$clientId, $secret],
+            'form_params' => [
+                'grant_type' => 'client_credentials',
+            ],
+        ]);
+
+        $data = json_decode($response->getBody(), true);
+        $accessToken = $data['access_token'];
+
+        // Step 2: Create Order
+        $response = $this->client->post("$this->paypalApiUrl/v2/checkout/orders", [
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'Authorization' => 'Bearer ' . $accessToken,
+            ],
+            'json' => [
+                'intent' => 'CAPTURE',
+                'purchase_units' => [
+                    [
+                        'amount' => [
+                            'currency_code' => strtoupper($currency),
+                            'value' => $amount,
+                        ],
                     ],
                 ],
             ],
-        ];
-    }
+        ]);
 
-    protected function getClient()
-    {
-        return new \PayPalHttp\HttpClient(
-            config('services.paypal.client_id'),
-            config('services.paypal.secret')
-        );
+        $data = json_decode($response->getBody(), true);
+        $orderId = $data['id'];
+
+        // Step 3: Get Approval Link
+        $response = $this->client->get("$this->paypalApiUrl/v2/checkout/orders/$orderId", [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $accessToken,
+            ],
+        ]);
+
+        $data = json_decode($response->getBody(), true);
+        $approvalLink = collect($data['links'])->firstWhere('rel', 'approve')['href'];
+
+        // update api resonse to sendMoney db
+        updateSendMoneyRawData($quoteId, $data);
+        // Step 4: Redirect User to PayPal Approval Link
+        return $approvalLink;
     }
 }

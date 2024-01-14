@@ -17,12 +17,14 @@ class CoinPaymentsController extends Controller
         $this->coinpayments = new CoinpaymentServices();
     }
 
-    public function makePayment($amount, $currency1='USD')
+    public function makePayment(int $quoteId, float $amount, string $currency1='USD')
     {
         $request = request();
         $currency2 = $request->crypto;
         $buyer_email = $request->user()->email;
-        return $this->coinpayments->CreateTransactionSimple($amount, $currency1, $currency2, $buyer_email);
+        $response = $this->coinpayments->CreateTransactionSimple($amount, $currency1, $currency2, $buyer_email);
+        updateSendMoneyRawData($quoteId, $response);
+        return $response;
     }
 
     public function validatePayment($transactionId)

@@ -4,6 +4,7 @@ use App\Models\settings;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
+use Modules\SendMoney\app\Models\SendMoney;
 
 if (!function_exists('user_can')) {
     /**
@@ -383,5 +384,17 @@ if(!function_exists('get_iso2')) {
     {
         // $country = Country::whereUuid($country);
         // return $country-->iso2;
+    }
+}
+
+if(!function_exists('updateSendMoneyRawData')) {
+    /**
+     * @return country 2 codes identifier
+     */
+    function updateSendMoneyRawData($quoteId, $data) : void
+    {
+        SendMoney::whereid($quoteId)->update([
+            'raw_data' => $data
+        ]);
     }
 }
