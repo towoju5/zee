@@ -33,7 +33,7 @@ class FlutterwaveController extends Controller
                 ],
                 "customizations" => [
                     "title" => getenv('APP_NAME'),
-                    "description" => "20th October"
+                    "description" => "Payment for trasnsaction $quoteId"
                 ]
             ];
             $payment = Flutterwave::initializePayment($data);
