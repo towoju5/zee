@@ -9,6 +9,8 @@ use Modules\Advcash\app\Http\Controllers\AdvcashController;
 use Modules\BinancePay\app\Http\Controllers\BinancePayController;
 use Modules\CoinPayments\app\Http\Controllers\CoinPaymentsController;
 use Modules\Flutterwave\app\Http\Controllers\FlutterwaveController;
+use Modules\Monnet\app\Http\Controllers\MonnetController;
+use Modules\Monnet\app\Services\MonnetServices;
 use Modules\Monnify\app\Http\Controllers\MonnifyController;
 use Modules\PayPal\app\Http\Controllers\PayPalDepositController;
 use Modules\PayPal\app\Providers\PayPalServiceProvider;
@@ -72,9 +74,9 @@ class PaymentService
     public function advcash($quoteId, $amount, $currency)
     {
         try {
-            // $advcash = new AdvcashController();
-            // $init = $advcash->init($quoteId, $amount, $currency);
-            // return $init;
+            $advcash = new AdvcashController();
+            $init = $advcash->init($quoteId, $amount, $currency);
+            return $init;
         } catch (\Throwable $th) {
             return ['error' => $th->getMessage()];
         }
@@ -113,6 +115,16 @@ class PaymentService
     {
         $paypal = new PayPalDepositController();
         $checkout = $paypal->createOrder($quoteId, $amount, $currency);
+        return $checkout;
+    }
+
+    public function monnet($quoteId, $amount, $currency)
+    {
+        if(!in_array($currency, ["COP", "PEN", "USD", "CLP", "ARS", "MXN"])) {
+            return ["error", "Unknow currency selected"];
+        }
+        $monnet = new MonnetServices();
+        $checkout = $monnet->payin($quoteId, $amount, $currency);
         return $checkout;
     }
 }

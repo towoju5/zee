@@ -20,6 +20,10 @@ class SendMoney extends Model
         "raw_data"
     ];
 
+    protected $casts = [
+        'raw_data' => 'array'
+    ];
+
     protected static function newFactory(): SendMoneyFactory
     {
         //return SendMoneyFactory::new();

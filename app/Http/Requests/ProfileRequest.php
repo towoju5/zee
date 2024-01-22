@@ -22,8 +22,8 @@ class ProfileRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required',
-            'bussinessName' => 'required',  
+            'name' => 'sometimes',
+            'bussinessName' => 'sometimes',  
             'idNumber' => 'nullable|string',
             'idType' => 'nullable|string',
             'firstName' => 'nullable|string',
@@ -36,7 +36,7 @@ class ProfileRequest extends FormRequest
             'street' => 'nullable|string',
             'additionalInfo' => 'nullable|string',
             'houseNumber' => 'nullable|string',
-            'verificationDocument' => 'nullable|string',
+            'verificationDocument' => 'nullable|file',
         ];
     }
 }

@@ -63,6 +63,13 @@ if (!function_exists('_date')) {
     }
 }
 
+if (!function_exists('convertIntToDecimal')) {
+    function convertIntToDecimal($integerValue, $precision = 2) {
+        $decimalValue = number_format($integerValue, $precision, '.', '');
+        return $decimalValue;
+    }
+}
+
 if (!function_exists('settings')) {
     /**
      * Gera a paginação dos itens de um array ou collection.
@@ -155,12 +162,12 @@ if (!function_exists('get_error_response')) {
 
 if (!function_exists('uuid')) {
     /**
-     * @return uniquid()
-     * return uuid()
+     * @return string uniquid()
+     * return string uuid()
      */
     function uuid($length = 8)
     {
-        return strtoupper(Str::random($length));
+        // return strtoupper(Str::random($length));
         return sprintf(
             '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
 
@@ -199,6 +206,7 @@ if (!function_exists('save_image')) {
             $paths = "$image_path/$name";
             return asset($paths);
         }
+        return false;
     }
 }
 

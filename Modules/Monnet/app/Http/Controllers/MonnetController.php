@@ -18,4 +18,14 @@ class MonnetController extends Controller
     {
         return http_response_code(200);
     }
+    
+    public function success(Request $request)
+    {
+        return http_response_code(200);
+    }
+
+    public function failed(Request $request)
+    {
+        return http_response_code(200);
+    }
 }

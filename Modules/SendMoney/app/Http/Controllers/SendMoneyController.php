@@ -19,7 +19,7 @@ class SendMoneyController extends Controller
     public function get_quotes()
     {
         try {
-			$quotes = SendQuote::whereUserId(active_user())->paginate(10);
+			$quotes = SendQuote::whereUserId(active_user())->with('details')->paginate(10);
 			return get_success_response($quotes);
 		} catch (\Throwable $th) {
 			get_error_response(['error'  => $th->getMessage()]);
@@ -74,6 +74,12 @@ class SendMoneyController extends Controller
 				'transfer_purpose' 	=>	'sometimes',
 			]);
 
+			$check_send_gateway = self::method_exists($request->send_gateway, 'deposit');
+			$check_receive_gateway = self::method_exists($request->receive_gateway, 'payout');
+
+			if($check_send_gateway < 1 || $check_receive_gateway < 1) {
+				return get_error_response(['error' => 'Unknown gateway selected']);
+			}
 
 			$user = User::find(active_user());
 			$validate['rate'] = null;
@@ -143,6 +149,20 @@ class SendMoneyController extends Controller
 		} catch (\Throwable $th) {
 			//throw $th;
 		}
+	}
+
+	/**
+	 * method = payment gateway
+	 * mode ['deposit', 'payout']
+	 */
+	public function method_exists($method, $mode)
+	{
+		$where = [
+			'slug' => $method,
+			$mode => true
+		];
+		$gate = Gateways::where($where)->count();
+		return $gate;
 	}
 }  
 

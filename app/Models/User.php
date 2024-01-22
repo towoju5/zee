@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -27,7 +26,27 @@ class User extends Authenticatable implements JWTSubject
      * @var array<int, string>
      */
     protected $fillable = [
-        'name', 'email', 'bussinessName', 'password', 'email', 'idNumber', 'idType', 'firstName', 'lastName', 'phoneNumber', 'city', 'state', 'country', 'zipCode', 'address', 'houseNumber', 'verificationDocument'
+        "name",
+        "bussinessName",
+        "idNumber",
+        "idType",
+        "firstName",
+        "lastName",
+        "phoneNumber",
+        "city",
+        "state",
+        "country",
+        "zipCode",
+        "street",
+        "additionalInfo",
+        "houseNumber",
+        "verificationDocument",
+        "email",
+        "email_verified_at",
+        "two_factor_confirmed_at",
+        "current_team_id",
+        "profile_photo_path",
+        "profile_photo_url"
     ];
 
     /**
@@ -42,7 +61,7 @@ class User extends Authenticatable implements JWTSubject
         'two_factor_secret',
         'created_at',
         'updated_at',
-        'deleted_at'
+        'deleted_at',
     ];
 
     /**
@@ -73,19 +92,23 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
-    public function balance() {
+    public function balance()
+    {
         return $this->hasMany(Balance::class);
     }
 
-    public function transactions() {
+    public function transactions()
+    {
         return $this->hasMany(Transaction::class);
     }
 
-    public function deposit() {
+    public function deposit()
+    {
         return $this->hasMany(Deposit::class);
     }
 
-    public function withdrawals() {
+    public function withdrawals()
+    {
         return $this->hasMany(Withdraw::class);
     }
 }

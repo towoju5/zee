@@ -41,11 +41,11 @@ class BitnobController extends Controller
     {
         try {
             $data = [
-                'customerEmail' => 'johndoe@gmail.com',
+                'customerEmail' => $request->user()->email,
                 'cardBrand'     => 'visa', // cardBrand should be "visa" or "mastercard"
                 'cardType'      => 'virtual',
-                'reference'     => '4f644a2c-3c4f-48c7-a3fa-e896b544d546',
-                'amount'        => 5000,
+                'reference'     => uuid(),
+                'amount'        => $request->amount,
             ];
             $result = app('bitnob')->create($data);
             if($result) {
@@ -61,7 +61,7 @@ class BitnobController extends Controller
         try {
             $arr = [
                 'cardId'    => $cardId,
-                'reference' => uniqid(),
+                'reference' => uuid(),
                 'amount'    => $request->amount,
             ];
             $result = app('bitnob')->topup($arr);

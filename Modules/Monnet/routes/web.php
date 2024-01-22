@@ -18,4 +18,8 @@ Route::group([], function () {
     Route::resource('monnet', MonnetController::class)->names('monnet');
     Route::post("webhook/monnet/payin",     [MonnetController::class, 'payin_webhook']);
     Route::post("webhook/monnet/payout",    [MonnetController::class, 'payout_webhook']);
+
+    Route::any('callback/monnet/success/{userId}/{txn}', [MonnetController::class, 'success'])->name("callback.monnet.success");
+    Route::any('callback/monnet/failed/{userId}/{txn}', [MonnetController::class, 'failed'])->name("callback.monnet.failed");
 });
+

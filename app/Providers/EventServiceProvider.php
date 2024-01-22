@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Events\DebitCreditEvent;
 use App\Listeners\DebitCreditListener;
+use App\Listeners\MonnifyNotificationListener;
+use Bhekor\LaravelMonnify\Events\NewWebHookCallReceived;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -22,6 +24,9 @@ class EventServiceProvider extends ServiceProvider
         ],
         DebitCreditEvent::class => [
             DebitCreditListener::class,
+        ],
+        NewWebHookCallReceived::class => [
+            MonnifyNotificationListener::class,
         ],
     ];
 

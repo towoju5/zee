@@ -3,27 +3,28 @@
 namespace Modules\Monnify\app\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Services\MonnifyService;
+use Modules\Monnify\App\Services\MonnifyService;
 
 class MonnifyController extends Controller
 {
-    protected $monnifyService;
-
-    public function __construct(MonnifyService $monnifyService = null)
-    {
-        $this->monnifyService = $monnifyService;
-    }
-
     public function createCheckout(int $quoteId, float $amount, string $currency)
     {
-        $customerEmail = auth()->user()->email;
-        $paymentReference = uuid(); 
-
-        $checkoutUrl = $this->monnifyService->createCheckoutUrl($customerEmail, $amount, $paymentReference);
+        $moniffy = new MonnifyService;
+        $checkoutUrl = $moniffy->createCheckoutUrl($amount, $currency);
 
         updateSendMoneyRawData($quoteId, $checkoutUrl);
-        return $response;
-        // Redirect the user to the checkout URL
-        return redirect($checkoutUrl);
+        return $checkoutUrl;
+    }
+
+    public function verifyTrans($transRef)
+    {
+        try {
+            $ref = urlencode($transRef);
+            $moniffy = new MonnifyService;
+            $response = $moniffy->verifyTrans($ref);
+            return $response;
+        } catch (\Throwable $th) {
+            return ['error' => $th->getMessage()];
+        }
     }
 }

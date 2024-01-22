@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Modules\ShuftiPro\app\Http\Controllers\ShuftiProController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,6 +26,10 @@ Route::middleware([
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
+});
+
+Route::group([], function(){
+    Route::get('shufti-pro/callback/{user_id}', [ShuftiProController::class, 'webhook'])->name('shuftipro.webhook');
 });
 
 

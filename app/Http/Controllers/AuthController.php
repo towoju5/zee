@@ -190,9 +190,10 @@ class AuthController extends Controller implements UpdatesUserProfileInformation
         }
     }
 
-    public function update(ProfileRequest $request, User $user)
+    public function update(ProfileRequest $request, $user = null)
     {
-        $user->update([
+        $user = User::findorfail(active_user());
+        $user->update(array_filter([
             "name"          =>  $request->name,
             "bussinessName" =>  $request->bussinessName,
             "firstName"     =>  $request->firstName,
@@ -210,17 +211,17 @@ class AuthController extends Controller implements UpdatesUserProfileInformation
             "idIssuedAt"    =>  $request->idIssuedAt,
             "idExpiryDate"  =>  $request->idExpiryDate,
             "idIssueDate"   =>  $request->idIssueDate,
-        ]);
+        ]));
 
-        if($request->has('verificationDocument')) {
+        if($request->hasFile('verificationDocument')) {
             $user->update([
                 'verificationDocument' => save_image("$request->name/document/", $request->verificationDocument)
             ]);
         }
 
-        // if ($request->has('photo')) {
-        //     $user->updateProfilePhoto($request->photo);
-        // }
+        if ($request->has('photo')) {
+            $user->updateProfilePhoto($request->photo);
+        }
 
         // You can customize the response as needed
         return get_success_response(['message' => 'Profile updated successfully', 'user' => $user]);

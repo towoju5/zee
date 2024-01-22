@@ -1,45 +1,34 @@
 <?php
-namespace App\Services;
+namespace Modules\Monnify\App\Services;
 
+use Bhekor\LaravelMonnify\Classes\MonnifyIncomeSplitConfig;
+use Bhekor\LaravelMonnify\Classes\MonnifyPaymentMethod;
+use Bhekor\LaravelMonnify\Classes\MonnifyPaymentMethods;
+use Bhekor\LaravelMonnify\Facades\Monnify;
 use GuzzleHttp\Client;
+use GuzzleHttp\RequestOptions;
 
 class MonnifyService
 {
-    protected $apiUrl;
-    protected $apiKey;
-    protected $contractCode;
-
-    public function __construct()
-    {
-        $this->apiUrl = config('services.monnify.api_url');
-        $this->apiKey = config('services.monnify.api_key');
-        $this->contractCode = config('services.monnify.contract_code');
-    }
-
     public function createCheckoutUrl($amount, $currency)
     {
-        $client = new Client();
         $user = auth()->user();
-        $customerEmail = $user->email;
         $paymentReference = uuid(8);
+        $paymentDescription = "Payment to " . getenv('APP_NAME');
+        $redirectUrl = "";
+        $monnifyPaymentMethods = null;
+        $monnifyPaymentMethods = new MonnifyPaymentMethods(MonnifyPaymentMethod::CARD(), MonnifyPaymentMethod::ACCOUNT_TRANSFER());
+        $incomeSplitConfig  = new \Bhekor\LaravelMonnify\Classes\MonnifyIncomeSplitConfig;
 
-        $response = $client->post($this->apiUrl . '/v1/merchant/checkout', [
-            'headers' => [
-                'Authorization' => 'Basic ' . base64_encode($this->apiKey),
-                'Content-Type' => 'application/json',
-            ],
-            
-            'json' => [
-                'contractCode' => $this->contractCode,
-                'amount' => $amount,
-                'paymentReference' => $paymentReference,
-                'currencyCode' => $currency,
-                'customerEmail' => $customerEmail,
-            ],
-        ]);
+        $responseBody = Monnify::Transactions()
+            ->initializeTransaction($amount, $user->name, $user->email, $paymentReference, $paymentDescription, $redirectUrl, $monnifyPaymentMethods);
+        return $responseBody;
+    }
 
-        $responseData = json_decode($response->getBody(), true);
-
-        return $responseData['data']['checkoutUrl'] ?? null;
+    public function verifyTrans($transRef)
+    {
+        $ref = urlencode($transRef);
+        $responseBody = Monnify::Transactions()->getTransactionStatus($transRef);
+        return $responseBody;
     }
 }
