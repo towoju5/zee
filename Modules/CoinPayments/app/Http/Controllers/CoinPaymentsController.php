@@ -14,17 +14,23 @@ class CoinPaymentsController extends Controller
 
     public function __construct()
     {
-        $this->coinpayments = new CoinpaymentServices();
+        $apiKey = getenv("COINPAYMENT_PRIVATE_KEY");
+        $secretKey = getenv("COINPAYMENT_PUBLIC_KEY");
+        $this->coinpayments = new CoinpaymentServices($apiKey, $secretKey);
     }
 
     public function makePayment(int $quoteId, float $amount, string $currency1='USD')
     {
         $request = request();
+        $request->merge([
+            "crypto" => "USDC"
+        ]);
+        
         $currency2 = $request->crypto;
         $buyer_email = $request->user()->email;
         $response = $this->coinpayments->CreateTransactionSimple($amount, $currency1, $currency2, $buyer_email);
         updateSendMoneyRawData($quoteId, $response);
-        return $response;
+        return $response['result'] ?? [];
     }
 
     public function validatePayment($transactionId)

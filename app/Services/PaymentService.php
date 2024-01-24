@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Log;
 use Modules\Advcash\app\Http\Controllers\AdvcashController;
 use Modules\BinancePay\app\Http\Controllers\BinancePayController;
 use Modules\CoinPayments\app\Http\Controllers\CoinPaymentsController;
+use Modules\Flow\app\Http\Controllers\FlowController;
+use Modules\Flow\app\Services\FlowServices;
 use Modules\Flutterwave\app\Http\Controllers\FlutterwaveController;
 use Modules\Monnet\app\Http\Controllers\MonnetController;
 use Modules\Monnet\app\Services\MonnetServices;
@@ -121,10 +123,20 @@ class PaymentService
     public function monnet($quoteId, $amount, $currency)
     {
         if(!in_array($currency, ["COP", "PEN", "USD", "CLP", "ARS", "MXN"])) {
-            return ["error", "Unknow currency selected"];
+            return ["error" => "Unknown currency selected"];
         }
         $monnet = new MonnetServices();
         $checkout = $monnet->payin($quoteId, $amount, $currency);
+        return $checkout;
+    }
+
+    public function flow($quoteId, $amount, $currency)
+    {
+        if(!in_array($currency, ["CLP"])) {
+            return ["error" => "Unknown currency selected"];
+        }
+        $flow = new FlowController();
+        $checkout = $flow->makePayment($quoteId, $amount, $currency);
         return $checkout;
     }
 }

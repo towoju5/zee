@@ -19,7 +19,7 @@ class SendMoneyController extends Controller
     public function get_quotes()
     {
         try {
-			$quotes = SendQuote::whereUserId(active_user())->with('details')->paginate(10);
+			$quotes = SendQuote::whereUserId(active_user())->with('details')->latest()->paginate(10);
 			return get_success_response($quotes);
 		} catch (\Throwable $th) {
 			get_error_response(['error'  => $th->getMessage()]);
@@ -74,11 +74,11 @@ class SendMoneyController extends Controller
 				'transfer_purpose' 	=>	'sometimes',
 			]);
 
-			$check_send_gateway = self::method_exists($request->send_gateway, 'deposit');
-			$check_receive_gateway = self::method_exists($request->receive_gateway, 'payout');
+			$check_send_gateway = self::method_exists($request->send_gateway, $request->send_currency, 'deposit');
+			$check_receive_gateway = self::method_exists($request->receive_gateway, $request->receive_currency, 'payout');
 
 			if($check_send_gateway < 1 || $check_receive_gateway < 1) {
-				return get_error_response(['error' => 'Unknown gateway selected']);
+				return get_error_response(['error' => 'Unknown gateway or unsupported currency selected']);
 			}
 
 			$user = User::find(active_user());
@@ -122,6 +122,9 @@ class SendMoneyController extends Controller
 					// dispatch(new Transaction($send, 'send_money'));
 					// $user->notify(new SendMoneyNotification($send));
 					$paymentUrl = (new PaymentService())->makePayment($send, $get_quote->send_gateway);
+					if(is_array($paymentUrl) && isset($paymentUrl['error']) && $paymentUrl['error'] != "ok") {
+						return get_error_response(['error' => $paymentUrl['error']]);
+					}
 					return get_success_response(['link' => $paymentUrl, 'quote' => $get_quote]);
 				}  
 				return get_error_response(['error' => 'Unable to process send request please contact support']);
@@ -155,13 +158,13 @@ class SendMoneyController extends Controller
 	 * method = payment gateway
 	 * mode ['deposit', 'payout']
 	 */
-	public function method_exists($method, $mode)
+	public function method_exists($method, $currency, $mode)
 	{
 		$where = [
 			'slug' => $method,
 			$mode => true
 		];
-		$gate = Gateways::where($where)->count();
+		$gate = Gateways::where($where)->whereJsonContains('supported_currencies', $currency)->count();
 		return $gate;
 	}
 }  

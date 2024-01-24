@@ -47,7 +47,10 @@ class ShuftiProServices
             $auth       = $client_id . ":" . $secret_key;
             $headers    = ['Content-Type: application/json'];
             $post_data  = json_encode($verification_request);
-            $response   = self::api_call($url, $post_data, $headers, $auth);
+            return $response   = self::api_call($url, $post_data, $headers, $auth);
+            if($response["error"]) {
+                return get_error_response(['error' => $response['error']['message']]);
+            }
             $response_data  = $response['body'];
             $sp_signature   = self::get_header_keys($response['headers'])['signature'];
             $calculate_signature = hash('sha256', $response_data . hash('sha256', $secret_key));
@@ -109,6 +112,6 @@ class ShuftiProServices
         $headers = substr($html_response, 0, $header_size);
         $body = substr($html_response, $header_size);
         curl_close($ch);
-        return ['headers' => $headers, 'body' => $body];
+        return ['headers' => to_array($headers), 'body' => to_array($body)];
     }
 }

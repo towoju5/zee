@@ -156,7 +156,7 @@ if (!function_exists('get_error_response')) {
             'message' =>  'Request failed',
             'data' =>  $data
         ];
-        return response()->json($response);
+        return response()->json($response, $status_code);
     }
 }
 

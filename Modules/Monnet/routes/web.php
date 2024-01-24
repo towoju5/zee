@@ -21,5 +21,8 @@ Route::group([], function () {
 
     Route::any('callback/monnet/success/{userId}/{txn}', [MonnetController::class, 'success'])->name("callback.monnet.success");
     Route::any('callback/monnet/failed/{userId}/{txn}', [MonnetController::class, 'failed'])->name("callback.monnet.failed");
+
+
+    Route::any('callback/flow/success/{userId}/{txn}', [MonnetController::class, 'success'])->name("callback.flow");
 });
 

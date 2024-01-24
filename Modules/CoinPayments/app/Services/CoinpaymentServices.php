@@ -9,7 +9,7 @@ class CoinpaymentServices
     private $public_key = '';
     private $ch = null;
 
-    public function Setup($private_key, $public_key)
+    public function __construct($private_key, $public_key)
     {
         $this->private_key = $private_key;
         $this->public_key = $public_key;
