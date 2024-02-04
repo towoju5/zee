@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DepositController;
+use App\Http\Controllers\Google2faController;
+use App\Http\Controllers\MagicLinkController;
 use App\Http\Controllers\MiscController;
 use App\Http\Controllers\UserMetaController;
 use App\Http\Controllers\WalletController;
@@ -36,13 +38,24 @@ Route::group(['prefix'  => 'v1/auth'], function(){
     Route::post('send-verification-otp', [AuthController::class, 'sendVerificationOtp']);
     Route::post('verify-otp', [MiscController::class, 'verifyOtp']);
 
+    // magic login routes
+    Route::post('login/magic', [MagicLinkController::class, 'sendMagicLink']);
+    Route::post('login/magic-login', [MagicLinkController::class ,'loginWithMagicLink']);
+
     Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
     Route::post('reset-password-with-otp', [AuthController::class, 'resetPasswordWithOtp']);
 });
 
 
-
 Route::middleware(['auth:api'])->prefix('v1')->name('api.')->group(function () {
+
+    Route::group(['middleware' => 'google2fa'], function () {
+        Route::post('generate-2fa-secret', [Google2faController::class, 'generateSecret']);
+        Route::post('enable-2fa', [Google2faController::class, 'enable2fa']);
+        Route::post('verify-2fa', [Google2faController::class, 'verify2fa']);
+        Route::post('disable-2fa', [Google2faController::class, 'disable2fa']);
+    });
+    
     Route::get('auth/refresh-token', [AuthController::class, 'refresh']);
 
     Route::put('profile', [AuthController::class, 'update']);

@@ -37,9 +37,6 @@ class AuthController extends Controller implements UpdatesUserProfileInformation
         $token = auth()->attempt($credentials);
 
         $user = User::where('email', $request->email)->first();
-
-        $urlToAutoLogin =  MagicLink::create(new LoginAction($user))->url;
-        return get_success_response($urlToAutoLogin);
         
         if ($token === false) {
             return get_error_response(['error' => 'Unauthorized'], 401);
