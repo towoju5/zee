@@ -71,6 +71,7 @@ class SendMoneyController extends Controller
 				'receive_gateway'	=>	'required',
 				'send_currency'		=>	'required',
 				'receive_currency' 	=>	'required',
+				'beneficiary_id' 	=>	'required',
 				'transfer_purpose' 	=>	'sometimes',
 			]);
 
@@ -93,6 +94,7 @@ class SendMoneyController extends Controller
 			}
 
 			// return $validate;
+
 			if($send = SendQuote::create($validate)){
 				// add transaction history
 				// @dispatch(new SendMoneyQuoteNotification($send, 'send_money'));

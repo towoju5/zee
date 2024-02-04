@@ -62,6 +62,11 @@ class PaymentService
         }
     }
 
+    public function deposit($amount, $currency, $gateway)
+    {
+        //
+    }
+
     public function binance_pay($quoteId, $amount, $currency)
     {
         try {

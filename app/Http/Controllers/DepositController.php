@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\Transaction;
 use App\Models\Deposit;
 use App\Services\PaymentService;
 use Illuminate\Http\Request;
@@ -43,8 +44,9 @@ class DepositController extends Controller
             $deposit->currency = $request->currency;
             if($deposit->save()){
                 // add transaction history
+                Transaction::dispatch($deposit->toArray(), 'deposit');
                 // now call the payment endpoint
-                $payment = new PaymentService();
+                $payment = new PaymentService(); 
                 $callback = $payment->makePayment($request->amount, $request->currency, $request->gateway);
                 return get_success_response($callback);
             }

@@ -4,7 +4,6 @@ namespace App\Jobs;
 
 use App\Models\Transaction as ModelsTransaction;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -30,15 +29,19 @@ class Transaction implements ShouldQueue
      */
     public function handle(): void
     {
-        $type = $this->type;
-        $data = $this->data;
-        foreach ($data as $key => $d) {
-            ModelsTransaction::create([
-                'meta_id'    => $data['id'],
-                'meta_key'   => $key,
-                'meta_value' => $d,
-                'meta_type'  => $type
-            ]);
+        try {
+            $type = $this->type;
+            $data = $this->data;
+            foreach ($data as $key => $d) {
+                ModelsTransaction::create([
+                    'meta_id' => $data['id'],
+                    'meta_key' => $key,
+                    'meta_value' => $d,
+                    'meta_type' => $type,
+                ]);
+            }
+        } catch (\Throwable $th) {
+            // continue;
         }
 
         // inititate payout

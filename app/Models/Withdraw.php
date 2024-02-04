@@ -20,4 +20,11 @@ class Withdraw extends Model
     protected $hidden = [
         'deleted_at'
     ];
+
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class)
+            ->where('meta_id', '=', $this->getKey())
+            ->where('meta_type', '=', 'payouts');
+    }
 }

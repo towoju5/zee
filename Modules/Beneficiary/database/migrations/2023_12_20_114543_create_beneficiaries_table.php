@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('beneficiaries', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users');
+            $table->string('method');
             $table->json('beneficiary');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();

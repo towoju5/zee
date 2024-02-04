@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileRequest;
+use App\Models\Balance;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -11,7 +12,11 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Log;
 use Laravel\Fortify\Contracts\UpdatesUserProfileInformation;
+use MagicLink\Actions\LoginAction;
+use MagicLink\MagicLink;
+use Modules\Currencies\app\Models\Currency;
 
 class AuthController extends Controller implements UpdatesUserProfileInformation
 {
@@ -28,9 +33,16 @@ class AuthController extends Controller implements UpdatesUserProfileInformation
         }
 
         $credentials = ['email' => $request->email, 'password' => $request->password];
+
         $token = auth()->attempt($credentials);
+
+        $user = User::where('email', $request->email)->first();
+
+        $urlToAutoLogin =  MagicLink::create(new LoginAction($user))->url;
+        return get_success_response($urlToAutoLogin);
+        
         if ($token === false) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+            return get_error_response(['error' => 'Unauthorized'], 401);
         }
         return $this->respondWithToken($token);
     }
@@ -57,9 +69,9 @@ class AuthController extends Controller implements UpdatesUserProfileInformation
     public function register(Request $request)
     {
         // Validate the incoming request data
-        $validator = Validator::make($request->all(), [
+        $validator = $request->validate([
             'name' => 'required',
-            'businessName' => 'required',
+            'bussinessName' => 'required',
             'idNumber' => 'nullable|string',
             'idType' => 'nullable|string',
             'firstName' => 'nullable|string',
@@ -77,33 +89,30 @@ class AuthController extends Controller implements UpdatesUserProfileInformation
             'password' => 'required|min:6',
         ]);
 
-        if ($validator->fails()) {
-            return get_error_response(['error' => $validator->errors()], 422);
+        // Create a new user
+        $validator['password'] = bcrypt($request->password);
+        $user = User::create($validator);
+
+        if($user) {
+            try {
+                $currencies = Currency::all();
+                foreach($currencies as $k => $v) {
+                    Balance::create([
+                        "user_id" => $user->id,
+                        "currency_name" => $v->currency_name,
+                        "currency_code" => $v->wallet,
+                        "main_balance" => $v->main_balance,
+                        "ledger_balance" => $v->ledger_balance,
+                        "currency_symbol" => $v->currency_icon,
+                    ]);
+                }
+            } catch (\Throwable $th) {
+                Log::error(json_encode(['error_creating_balance' => $th->getMessage()]));
+            }
         }
 
-        // Create a new user
-        $user = User::create([
-            'name' => $request->input('name'),
-            'bussinessName' => $request->input('businessName'),
-            'id_number' => $request->input('idNumber'),
-            'id_type' => $request->input('idType'),
-            'first_name' => $request->input('firstName'),
-            'last_name' => $request->input('lastName'),
-            'phone_number' => $request->input('phoneNumber'),
-            'city' => $request->input('city'),
-            'state' => $request->input('state'),
-            'country' => $request->input('country'),
-            'zip_code' => $request->input('zipCode'),
-            'street' => $request->input('street'),
-            'additional_info' => $request->input('additionalInfo'),
-            'house_number' => $request->input('houseNumber'),
-            'verification_document' => save_image('customer-documents', $request->input('verificationDocument')) ?? null,
-            'email' => $request->input('email'),
-            'password' => bcrypt($request->input('password')),
-        ]);
-
         // You can customize the response as needed
-        return get_success_response(['message' => 'User registered successfully', 'user' => $user], 201);
+        return get_success_response($user, 201);
     }
 
     public function sendVerificationOtp(Request $request)

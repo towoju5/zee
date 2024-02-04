@@ -17,6 +17,9 @@ class CreateCountryStateCityTable extends Migration
         Schema::create('countries', function (Blueprint $table) {
             $table->id();
             $table->string('name', 255);
+            $table->string('iso2', 255);
+            $table->string('iso3', 255);
+            $table->string('calling_code', 20);
             $table->enum('status', ['active', 'inactive'])->default('active');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();

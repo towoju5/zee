@@ -25,7 +25,7 @@ if (!function_exists('to_array')) {
     /**
      * convert object to array
      */
-    function to_array($data): array
+    function to_array($data)
     {
         if (null == $data) {
             return [];

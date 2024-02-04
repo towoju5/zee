@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('send_quotes', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users');
+            $table->foreignId('beneficiary_id')->constrained('beneficiaries');
             $table->string('action')->nullable();
             $table->string('send_amount')->nullable();
             $table->string('receive_amount')->nullable();

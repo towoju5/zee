@@ -10,6 +10,7 @@ use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Jetstream\HasTeams;
 use Laravel\Sanctum\HasApiTokens;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use Yadahan\AuthenticationLog\AuthenticationLogable;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -19,35 +20,39 @@ class User extends Authenticatable implements JWTSubject
     use HasTeams;
     use Notifiable;
     use TwoFactorAuthenticatable;
+    use AuthenticationLogable;
+    // use HasRolesAndPermission;
 
     /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
-    protected $fillable = [
-        "name",
-        "bussinessName",
-        "idNumber",
-        "idType",
-        "firstName",
-        "lastName",
-        "phoneNumber",
-        "city",
-        "state",
-        "country",
-        "zipCode",
-        "street",
-        "additionalInfo",
-        "houseNumber",
-        "verificationDocument",
-        "email",
-        "email_verified_at",
-        "two_factor_confirmed_at",
-        "current_team_id",
-        "profile_photo_path",
-        "profile_photo_url"
-    ];
+    // protected $fillable = [
+    //     "name",
+    //     "bussinessName",
+    //     "idNumber",
+    //     "idType",
+    //     "firstName",
+    //     "lastName",
+    //     "phoneNumber",
+    //     "city",
+    //     "state",
+    //     "country",
+    //     "zipCode",
+    //     "street",
+    //     "additionalInfo",
+    //     "houseNumber",
+    //     "verificationDocument",
+    //     "email",
+    //     "email_verified_at",
+    //     "two_factor_confirmed_at",
+    //     "current_team_id",
+    //     "profile_photo_path",
+    //     "profile_photo_url"
+    // ];
+
+    protected $guarded = [];
 
     /**
      * The attributes that should be hidden for serialization.

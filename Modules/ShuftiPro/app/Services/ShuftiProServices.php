@@ -16,33 +16,41 @@ class ShuftiProServices
             $client_id    = getenv('SHUFTI_PRO_CLIENT_ID');
             $secret_key = getenv('SHUFTI_PRO_SECRET_KEY');
             $user = User::find(active_user());
+
+            // // route('shuftipro.webhook', $user->id),
+            // $verification_request = [
+            //     "reference"             => uuid(),                                          //your unique request reference
+            //     "callback_url"          => "https://webhook.site/4a62a5c2-2c58-4ff4-bb2b-229edcf24395", //route('shuftipro.webhook', $user->id),           //URL where you will receive the webhooks from Shufti Pro
+            //     "email"                 => $user->email,                                    //end-user email
+            //     "country"               => get_iso2($user->country ?? $request->country) ?? null,                //end-user country
+            //     "language"              => "EN",                                            //select ISO2 code for your desired language on verification screen
+            //     "redirect_url"          => 'https://zeenah.azurewebsites.net/',                               //URL where end-user will be redirected after verification completed
+            //     "allow_online"          => true,                                            //allow end-user to upload real-time or already catured proofs
+            //     "verification_mode"     => "any",                                           //what kind of proofs will be provided to Shufti Pro for verification?
+            //     "show_results"          => true,                                            //verification results screen will be shown to end-user
+            //     "allow_offline"         => false,                                           //allow end-user to upload verification proofs if the webcam is not accessible
+            //     "show_feedback_form"    => true,                                            //User cannot send Feedback
+            //     "show_privacy_policy"   => true,                                            //privacy policy screen will be shown to end-user
+            //     "show_consent"          => true,                                            //consent screen will be shown to end-user
+            // ];
+            // //face onsite verification
+            // $verification_request['face'] = [];
+            // //document onsite verification with OCR
+            // $verification_request['document'] = [
+            //     'dob'                   => $user->dob ?? $request->dob,
+            //     'gender'                => $user->gender ?? self::get_gender($request->gender),
+            //     'place_of_issue'        => $user->idIssuedAt ?? $request->idIssuedAt,
+            //     'document_number'       => $user->idNumber ?? $request->idNumber,
+            //     'expiry_date'           => $user->idExpiryDate ?? $request->idExpiryDate,
+            //     'issue_date'            => $user->idIssueDate ?? $request->idIssueDate,
+            //     'fetch_enhanced_data'   => "1",
+            //     'supported_types'       => ['id_card', 'passport']
+            // ];
+
             $verification_request = [
-                "reference"             => uuid(),                                          //your unique request reference
-                "callback_url"          => route('shuftipro.webhook', $user->id),           //URL where you will receive the webhooks from Shufti Pro
-                "email"                 => $user->email,                                    //end-user email
-                "country"               => get_iso2($user->country ?? $request->country) ?? null,                //end-user country
-                "language"              => "EN",                                            //select ISO2 code for your desired language on verification screen
-                "redirect_url"          => 'https://zeenah.azurewebsites.net/',                               //URL where end-user will be redirected after verification completed
-                "allow_online"          => true,                                            //allow end-user to upload real-time or already catured proofs
-                "verification_mode"     => "any",                                           //what kind of proofs will be provided to Shufti Pro for verification?
-                "show_results"          => true,                                            //verification results screen will be shown to end-user
-                "allow_offline"         => false,                                           //allow end-user to upload verification proofs if the webcam is not accessible
-                "show_feedback_form"    => true,                                            //User cannot send Feedback
-                "show_privacy_policy"   => true,                                            //privacy policy screen will be shown to end-user
-                "show_consent"          => true,                                            //consent screen will be shown to end-user
-            ];
-            //face onsite verification
-            $verification_request['face'] = [];
-            //document onsite verification with OCR
-            $verification_request['document'] = [
-                'dob'                   => $user->dob ?? $request->dob,
-                'gender'                => $user->gender ?? $request->gender,
-                'place_of_issue'        => $user->idIssuedAt ?? $request->idIssuedAt,
-                'document_number'       => $user->idNumber ?? $request->idNumber,
-                'expiry_date'           => $user->idExpiryDate ?? $request->idExpiryDate,
-                'issue_date'            => $user->idIssueDate ?? $request->idIssueDate,
-                'fetch_enhanced_data'   => "1",
-                'supported_types'       => ['id_card', 'passport']
+                "reference"  => uuid(),
+                "journey_id"=> "qlNhsBgo1706225885",
+                "email" => auth()->user()->email
             ];
             $auth       = $client_id . ":" . $secret_key;
             $headers    = ['Content-Type: application/json'];
@@ -113,5 +121,14 @@ class ShuftiProServices
         $body = substr($html_response, $header_size);
         curl_close($ch);
         return ['headers' => to_array($headers), 'body' => to_array($body)];
+    }
+
+    private function get_gender($gender) 
+    {
+        if(strlen($gender) > 1) {
+            $gender = substr($gender, 0, 1);
+        }
+
+        return $gender;
     }
 }

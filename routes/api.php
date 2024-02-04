@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DepositController;
 use App\Http\Controllers\MiscController;
 use App\Http\Controllers\UserMetaController;
 use App\Http\Controllers\WalletController;
@@ -55,7 +56,12 @@ Route::middleware(['auth:api'])->prefix('v1')->name('api.')->group(function () {
 
 
     Route::group(['prefix' =>  'wallet'], function () {
-        Route::get('deposits',      [WalletController::class, 'deposits']);
+        Route::group(['prefix' =>  'deposits'], function () {
+            Route::get('/',      [DepositController::class, 'index']);
+            Route::post('new',      [DepositController::class, 'store']);
+        });
+
+        Route::post('zeenah-transfer', [WalletController::class, 'zeenahTransfer']);
         Route::get('withdrawals',   [WalletController::class, 'withdrawals']);
         Route::get('balance',       [WalletController::class, 'balance']);
     });

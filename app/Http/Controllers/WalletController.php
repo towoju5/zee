@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\Transaction as JobsTransaction;
 use App\Models\Balance;
 use App\Models\Deposit;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Models\Withdraw;
 use Illuminate\Http\Request;
 
 class WalletController extends Controller
@@ -51,7 +53,7 @@ class WalletController extends Controller
 
             // check sender balance
             $user = $request->user();
-            $sender_balance = Balance::whereUserId($user->id)->where('currency', $request->currency)->first();
+            $sender_balance = Balance::whereUserId($user->id)->where('currency_symbol', $request->currency)->first();
             if ($sender_balance < $request->amount) {
                 return get_error_response(['error' => 'Insufficient wallet balance']);
             }
@@ -59,15 +61,18 @@ class WalletController extends Controller
             if (!$receiver) {
                 return get_error_response(['error' => 'Invalid receiver provided']);
             }
-            
-            $receiver_balance = Balance::whereUserId($user->id)->where('currency', $request->currency)->first();
+            $receiver_balance = Balance::whereUserId($user->id)->where('currency_symbol', $request->currency)->first();
+            // if(!$receiver_balance)  {
+            //     // create the wallet
+            // }
             $receiver_balance->balance = floatval($receiver_balance->balance + $request->amount);
             $receiver_balance->save();
 
             $validate['sender_id'] = $user->id;
             $validate['receiver_id'] = $receiver->id;
             $validate['user_id'] = $user->id;
-            Transaction::create($validate);
+            Withdraw::create($validate);
+            JobsTransaction::dispatch($validate, 'zeenah_transfer');
             $payouts = Deposit::whereUserId(active_user())->with('transaction')->get();
             return get_success_response($payouts);
         } catch (\Throwable $th) {

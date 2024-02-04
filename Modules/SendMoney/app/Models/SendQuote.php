@@ -27,6 +27,7 @@ class SendQuote extends Model
         'transfer_purpose' => 'string',
         'rate' => 'float',
         'user_id' => 'int',
+        'beneficiary_id' => 'int',
         'total_amount' => 'float',
         'raw_data' => 'object',
     ];

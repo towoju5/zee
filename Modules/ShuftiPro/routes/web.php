@@ -17,3 +17,6 @@ use Modules\ShuftiPro\app\Http\Controllers\ShuftiProController;
 Route::group([], function () {
     Route::resource('shuftipro', ShuftiProController::class)->names('shuftipro');
 });
+
+
+Route::any('callback/shuftipro', [ShuftiProController::class, 'callback']);

@@ -13,15 +13,14 @@ return new class extends Migration
     {
         Schema::create('virtual_cards', function(Blueprint $table){
             $table->id();
-            $table->foreignId('user_id')->constrained('users');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->string('card_number');
             $table->string('expiry_date');
             $table->string('cvv');
             $table->string('card_id');
             $table->json('raw_data');
-            $table->timestamp('created_at')->useCurrent();
-            $table->timestamp('updated_at')->useCurrentOnUpdate();
-            $table->timestamp('deleted_at')->nullable();
+            $table->timestamps();
+            $table->softDeletes();
         });
     }
 

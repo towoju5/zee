@@ -3,7 +3,6 @@ namespace Modules\Monnet\app\Services;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Number;
 use Modules\Beneficiary\app\Models\Beneficiary;
 
 class MonnetServices
@@ -29,7 +28,7 @@ class MonnetServices
         }
     }
 
-    public function buildPayinPayload($amount, $currency="PEN")
+    public function buildPayinPayload($amount, $currency = "PEN")
     {
         $request = request();
         $user = $request->user();
@@ -87,9 +86,9 @@ class MonnetServices
     {
         try {
             $data = self::buildPayinPayload($amount, $currency);
-            $request =  Http::post(getenv("MONNET_PAYIN__URL"), $data)->json();
+            $request = Http::post(getenv("MONNET_PAYIN__URL"), $data)->json();
             updateSendMoneyRawData($quoteId, $data);
-            $response =  to_array($request);
+            $response = to_array($request);
             return $response["url"];
         } catch (\Throwable $th) {
             return ['error' => $th->getMessage()];
@@ -149,6 +148,222 @@ class MonnetServices
         return array_filter($arr);
     }
 
+    private function buildPeruPayout()
+    {
+        $body = [
+            'country' => 'PER',
+            'amount' => 100000,
+            'currency' => 'PEN',
+            'orderId' => 'R123456',
+            'description' => 'FreeTextFreeTextFreeTextFreeText',
+            'beneficiary' => [
+                'name' => 'Sergio',
+                'lastName' => 'test',
+                'email' => 'test@test.com',
+                'document' => [
+                    'type' => 1,
+                    'number' => '33446836',
+                ],
+            ],
+            'destination' => [
+                'bankAccount' => [
+                    'bankCode' => '001',
+                    'accountType' => '1',
+                    'accountNumber' => '00000000000',
+                ],
+            ],
+        ];
+    }
+
+    private function buildMexicoPayout()
+    {
+        // if(!in_array())
+        $body = [
+            'country' => 'MEX',
+            'amount' => 100000,
+            'currency' => 'MXN',
+            'orderId' => 'R123456',
+            'description' => 'FreeTextFreeTextFreeTextFreeText',
+            'beneficiary' => [
+                'name' => 'Sergio',
+                'lastName' => 'test',
+                'email' => 'test@test.com',
+                'document' => [
+                    'type' => 1,
+                    'number' => '33446836',
+                ],
+            ],
+            'destination' => [
+                'bankAccount' => [
+                    'bankCode' => '002',
+                    'clave' => '002123456789123456',
+                ],
+            ],
+        ];
+    }
+
+    private function buildHondurasayout()
+    {
+        $body = [
+            'country' => 'HND',
+            'amount' => 100000,
+            'currency' => 'HNL',
+            'orderId' => 'R123456',
+            'description' => 'FreeTextFreeTextFreeTextFreeText',
+            'beneficiary' => [
+                'name' => 'Sergio',
+                'lastName' => 'test',
+                'email' => 'test@test.com',
+                'document' => [
+                    'type' => 1,
+                    'number' => '33446836',
+                ],
+            ],
+            'destination' => [
+                'bankAccount' => [
+                    'bankCode' => '0101',
+                    'accountType' => '1',
+                    'accountNumber' => '00000000000',
+                ],
+            ],
+        ];
+    }
+
+    private function buildArgentinaPayout()
+    {
+        $body = [
+            'country' => 'ARG',
+            'amount' => 100000,
+            'currency' => 'ARS',
+            'orderId' => 'R123456',
+            'description' => 'FreeTextFreeTextFreeTextFreeText',
+            'beneficiary' => [
+                'name' => 'Sergio',
+                'lastName' => 'test',
+                'email' => 'test@test.com',
+                'document' => [
+                    'type' => 1,
+                    'number' => '33446836',
+                ],
+            ],
+            'destination' => [
+                'bankAccount' => [
+                    'bankCode' => '002',
+                    'accountType' => '1',
+                    'cbu' => '002123456789123456',
+                ],
+            ],
+        ];
+    }
+
+    private function buildChilePayout()
+    {
+        $body = [
+            'country' => 'CHL',
+            'amount' => 100000,
+            'currency' => 'CLP',
+            'orderId' => 'R123456',
+            'description' => 'FreeTextFreeTextFreeTextFreeText',
+            'beneficiary' => [
+                'name' => 'Sergio',
+                'lastName' => 'test',
+                'email' => 'test@test.com',
+                'document' => [
+                    'type' => 1,
+                    'number' => '33446836',
+                ],
+            ],
+            'destination' => [
+                'bankAccount' => [
+                    'bankCode' => '100',
+                    'accountType' => '1',
+                    'accountNumber' => '00000000000',
+                ],
+            ],
+        ];
+    }
+
+    private function buildColombiaPayout()
+    {
+        $body = [
+            'country' => 'COL',
+            'amount' => 100000,
+            'currency' => 'COP',
+            'orderId' => 'R123456',
+            'description' => 'FreeTextFreeTextFreeTextFreeText',
+            'beneficiary' => [
+                'name' => 'Sergio',
+                'lastName' => 'test',
+                'email' => 'test@test.com',
+                'document' => [
+                    'type' => 1,
+                    'number' => '33446836',
+                ],
+            ],
+            'destination' => [
+                'bankAccount' => [
+                    'bankCode' => '001',
+                    'accountType' => '1',
+                    'accountNumber' => '00000000000',
+                ],
+            ],
+        ];
+    }
+
+    private function buildEcuadorPayout()
+    {
+        $body = [
+            'country' => 'ECU',
+            'amount' => 100000,
+            'currency' => 'USD',
+            'orderId' => 'R123456',
+            'description' => 'FreeTextFreeTextFreeTextFreeText',
+            'beneficiary' => [
+                'name' => 'Sergio',
+                'lastName' => 'test',
+                'email' => 'test@test.com',
+                'document' => [
+                    'type' => 1,
+                    'number' => '33446836',
+                ],
+            ],
+            'destination' => [
+                'bankAccount' => [
+                    'bankCode' => '100',
+                    'accountType' => '1',
+                    'accountNumber' => '00000000000',
+                ],
+            ],
+        ];
+    }
+
+    private function buildGuatemalaPayout()
+    {
+        $body = [
+            'country' => 'GTM',
+            'amount' => 100000,
+            'currency' => 'GTQ',
+            'orderId' => 'R123456',
+            'description' => 'FreeTextFreeTextFreeTextFreeText',
+            'beneficiary' => [
+                'name' => 'Sergio',
+                'lastName' => 'test',
+                'email' => 'test@test.com',
+                'document' => [
+                    'type' => 1,
+                    'number' => '33446836',
+                ],
+            ],
+            'destination' => [
+                'bankAccount' => [
+                    'bankCode' => '0101',
+                    'accountType' => '1',
+                    'accountNumber' => '00000000000',
+                ],
+            ],
+        ];
+    }
+
     public function api_call(string $method = "GET", string $endpoint = "", array $payload = [])
     {
         $monnet_api = getenv("MONNET_PAYOUT_URL");
@@ -177,13 +392,13 @@ class MonnetServices
             echo 'cURL error: ' . curl_error($ch);
         }
         curl_close($ch);
-        var_dump($response); exit;
+        var_dump($response);exit;
     }
 
     private function generateVerificationString($payinMerchantID, $payinMerchantOperationNumber, $payinAmount, $payinCurrency, $KeyMonnet)
     {
         $concatenatedString = $payinMerchantID . $payinMerchantOperationNumber . $payinAmount . $payinCurrency . $KeyMonnet;
-        $verificationString = openssl_digest($concatenatedString,'sha512');
+        $verificationString = openssl_digest($concatenatedString, 'sha512');
 
         return $verificationString;
     }
@@ -191,57 +406,57 @@ class MonnetServices
     public function webhook(Request $request)
     {}
 
-    public function getPaymentData($currency) 
+    public function getPaymentData($currency)
     {
         switch ($currency) {
             case 'COP':
-                $data  = [
+                $data = [
                     "merchantId" => getenv("MONNET_COLUMBIA_ID"),
-                    "merchantKey"=> getenv("MONNET_COLUMBIA"),
+                    "merchantKey" => getenv("MONNET_COLUMBIA"),
                 ];
                 break;
-            
+
             case 'PEN':
-                $data  = [
+                $data = [
                     "merchantId" => getenv("MONNET_PERU_ID"),
-                    "merchantKey"=> getenv("MONNET_PERU"),
+                    "merchantKey" => getenv("MONNET_PERU"),
                     // "region" => "Lima"
                 ];
                 break;
-            
+
             case 'USD':
-                $data  = [
+                $data = [
                     "merchantId" => getenv("MONNET_ECUADO_ID"),
-                    "merchantKey"=> getenv("MONNET_ECUADO"),
+                    "merchantKey" => getenv("MONNET_ECUADO"),
                 ];
                 break;
-            
+
             case 'CLP':
-                $data  = [
+                $data = [
                     "merchantId" => getenv("MONNET_CHILE_ID"),
-                    "merchantKey"=> getenv("MONNET_CHILE"),
+                    "merchantKey" => getenv("MONNET_CHILE"),
                 ];
                 break;
-            
+
             case 'ARS':
-                $data  = [
+                $data = [
                     "merchantId" => getenv("MONNET_ARGENTINA_ID"),
-                    "merchantKey"=> getenv("MONNET_ARGENTINA"),
+                    "merchantKey" => getenv("MONNET_ARGENTINA"),
                 ];
                 break;
-            
+
             case 'MXN':
-                $data  = [
+                $data = [
                     "merchantId" => getenv("MONNET_MEXICO_ID"),
-                    "merchantKey"=> getenv("MONNET_MEXICO"),
+                    "merchantKey" => getenv("MONNET_MEXICO"),
                 ];
                 break;
-            
+
             default:
                 // DEFFAULT TO USD
-                $data  = [
+                $data = [
                     "merchantId" => getenv("MONNET_ECUADO_ID"),
-                    "merchantKey"=> getenv("MONNET_ECUADO"),
+                    "merchantKey" => getenv("MONNET_ECUADO"),
                 ];
                 break;
         }

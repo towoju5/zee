@@ -30,8 +30,10 @@ class Deposit extends Model
         'deleted_at'
     ];
 
-    public function transaction()
+    public function transactions()
     {
-        return $this->hasMany(Transaction::class);
+        return $this->hasMany(Transaction::class)
+            ->where('meta_id', '=', $this->getKey())
+            ->where('meta_type', '=', 'deposit');
     }
 }
