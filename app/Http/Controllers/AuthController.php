@@ -14,6 +14,7 @@ use Illuminate\Support\Str;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Laravel\Fortify\Contracts\UpdatesUserProfileInformation;
+use Laravel\Socialite\Facades\Socialite;
 use MagicLink\Actions\LoginAction;
 use MagicLink\MagicLink;
 use Modules\Currencies\app\Models\Currency;
@@ -231,5 +232,25 @@ class AuthController extends Controller implements UpdatesUserProfileInformation
 
         // You can customize the response as needed
         return get_success_response(['message' => 'Profile updated successfully', 'user' => $user]);
+    }
+
+    public function socialLogin(Request $request, $social)
+    {
+        $githubUser = Socialite::driver($social)->user();
+ 
+        $user = User::updateOrCreate([
+            'github_id' => $githubUser->id,
+        ], [
+            'name' => $githubUser->name,
+            'email' => $githubUser->email,
+            'github_token' => $githubUser->token,
+            'github_refresh_token' => $githubUser->refreshToken,
+        ]);
+    
+        $token = Auth::login($user);
+        if ($token === false) {
+            return get_error_response(['error' => 'Unauthorized'], 401);
+        }
+        return $this->respondWithToken($token);
     }
 }
