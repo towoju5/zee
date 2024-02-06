@@ -42,7 +42,7 @@ Route::group(['prefix'  => 'v1/auth'], function(){
     // magic authentication routes
     Route::post('login/magic',                  [MagicLinkController::class, 'sendMagicLink']);
     Route::post('login/magic-login',            [MagicLinkController::class ,'loginWithMagicLink']);
-    Route::post('register/magic',               [MagicLinkController::class, 'sendMagicCode']);
+    // Route::post('register/magic',               [MagicLinkController::class, 'sendMagicCode']);
     Route::post('register/complete/{token}',    [MagicLinkController::class ,'completeRegistration']);
 
     Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
