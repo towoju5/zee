@@ -15,8 +15,6 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class MagicLinkController extends Controller
 {
-    use ThrottlesLogins;
-
     public function sendMagicLink(Request $request)
     {
         try {
@@ -24,15 +22,10 @@ class MagicLinkController extends Controller
                 'email' => 'required|email',
             ]);
 
-            if ($this->hasTooManyLoginAttempts($request)) {
-                $this->fireLockoutEvent($request);
-                return $this->sendLockoutResponse($request);
-            }
-            $this->incrementLoginAttempts($request);
-
             $user = User::where('email', $request->email)->first();
             if (!$user) {
-                return get_error_response(['email' => 'We could not find a user with that email address.'], 401);
+                $user = new User();
+                $user->email = $request->email;
             }
             $token = rand(10111, 99999);
             $user->login_token = $token;
@@ -66,34 +59,6 @@ class MagicLinkController extends Controller
         return $this->respondWithToken($token);
     }
 
-    public function sendMagicCode(Request $request)
-    {
-        try {
-            $this->validate($request, [
-                'email' => 'required|email|unique:users',
-            ]);
-
-            // Generate a random magic code
-            $magicCode = rand(10111, 99999);
-
-            // Create a new user record with the email and magic code
-            $user = User::create([
-                'email' => $request->email,
-                'login_token' => $magicCode,
-                'login_token_created_at' => now(),
-            ]);
-
-            // Send the magic code to the user's email
-            $magicLink = url('/register/magic/' . $magicCode);
-            Mail::to($user->email)->send(new MagicLinkEmail($magicLink, $magicCode));
-
-            return get_success_response(['msg' => 'We have sent you a One time registration O.T.P, Please check your email.']);
-        } catch (\Throwable $th) {
-            return get_error_response(['error' => $th->getMessage()]);
-        }
-    }
-
-    // This method can be used to verify the magic code and complete the registration
     public function completeRegistration(Request $request, $token)
     {
         try {
@@ -113,11 +78,11 @@ class MagicLinkController extends Controller
                 'additionalInfo' => 'nullable|string',
                 'houseNumber' => 'nullable|string',
                 'verificationDocument' => 'nullable|string',
-                'email' => 'required|email|unique:users',
+                'email' => 'required|email',
                 'password' => 'required|min:6',
             ]);
 
-            $user = User::where('login_token', $token)
+            $user = User::where('login_token', $token)->where('email', $request->email)
                 ->where('login_token_created_at', '>=', now()->subMinutes(5))
                 ->first();
             if (!$user) {
@@ -126,7 +91,8 @@ class MagicLinkController extends Controller
 
             // Create a new user
             $validator['password'] = bcrypt(uuid());
-            $user = User::create($validator);
+            $validator['raw_data'] = $request->all();
+            $userData = $user->update($validator);
 
             if ($user) {
                 try {

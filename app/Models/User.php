@@ -67,6 +67,7 @@ class User extends Authenticatable implements JWTSubject
         'created_at',
         'updated_at',
         'deleted_at',
+        'raw_data'
     ];
 
     /**
@@ -76,6 +77,7 @@ class User extends Authenticatable implements JWTSubject
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'raw_data' => 'array'
     ];
 
     /**

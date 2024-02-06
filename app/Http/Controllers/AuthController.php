@@ -89,6 +89,7 @@ class AuthController extends Controller implements UpdatesUserProfileInformation
 
         // Create a new user
         $validator['password'] = bcrypt($request->password);
+        $validator['raw_data'] = $request->all();
         $user = User::create($validator);
 
         if($user) {
@@ -234,17 +235,15 @@ class AuthController extends Controller implements UpdatesUserProfileInformation
         return get_success_response(['message' => 'Profile updated successfully', 'user' => $user]);
     }
 
-    public function socialLogin(Request $request, $social)
-    {
-        $githubUser = Socialite::driver($social)->user();
- 
+    public function socialLogin(Request $request, $social=null)
+    { 
         $user = User::updateOrCreate([
-            'github_id' => $githubUser->id,
+            'email' => $request->email,
         ], [
-            'name' => $githubUser->name,
-            'email' => $githubUser->email,
-            'github_token' => $githubUser->token,
-            'github_refresh_token' => $githubUser->refreshToken,
+            'name' => $request->name,
+            'email' => $request->email,
+            'profile_photo_path' => $request->photo,
+            'raw_data' => $request->all()
         ]);
     
         $token = Auth::login($user);

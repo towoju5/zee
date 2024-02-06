@@ -34,15 +34,16 @@ Route::group(['prefix'  => 'v1/locations'], function(){
 
 Route::group(['prefix'  => 'v1/auth'], function(){
     Route::post('register', [AuthController::class, 'register']);
+    Route::post('register/social', [AuthController::class, 'socialLogin']);
     Route::post('login', [AuthController::class, 'login']);
     Route::post('send-verification-otp', [AuthController::class, 'sendVerificationOtp']);
     Route::post('verify-otp', [MiscController::class, 'verifyOtp']);
 
     // magic authentication routes
-    Route::post('login/magic',                      [MagicLinkController::class, 'sendMagicLink']);
-    Route::post('login/magic-login',                [MagicLinkController::class ,'loginWithMagicLink']);
-    Route::post('register/magic',                   [MagicLinkController::class, 'sendMagicCode']);
-    Route::post('register/complete-registration',   [MagicLinkController::class ,'completeRegistration']);
+    Route::post('login/magic',                  [MagicLinkController::class, 'sendMagicLink']);
+    Route::post('login/magic-login',            [MagicLinkController::class ,'loginWithMagicLink']);
+    Route::post('register/magic',               [MagicLinkController::class, 'sendMagicCode']);
+    Route::post('register/complete/{token}',    [MagicLinkController::class ,'completeRegistration']);
 
     Route::post('forgot-password', [AuthController::class, 'forgotPassword']);
     Route::post('reset-password-with-otp', [AuthController::class, 'resetPasswordWithOtp']);
