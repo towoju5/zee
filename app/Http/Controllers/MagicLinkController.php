@@ -21,11 +21,14 @@ class MagicLinkController extends Controller
             $this->validate($request, [
                 'email' => 'required|email',
             ]);
-
+            $success = [];
+            $success['msg'] = 'We have sent you a One time login O.T.P, Please check your email.';
             $user = User::where('email', $request->email)->first();
             if (!$user) {
                 $user = new User();
                 $user->email = $request->email;
+            } else {
+                $success['is_registered'] = true;
             }
             $token = rand(10111, 99999);
             $user->login_token = $token;
@@ -33,7 +36,7 @@ class MagicLinkController extends Controller
             $user->save();
             $magicLink = url('/login/magic/' . $token);
             Mail::to($user)->send(new MagicLinkEmail($magicLink, $token));
-            return get_success_response(['msg' => 'We have sent you a One time login O.T.P, Please check your email.']);
+            return get_success_response($success);
         } catch (\Throwable $th) {
             return get_error_response(['error' => $th->getMessage()]);
         }

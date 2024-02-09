@@ -13,7 +13,13 @@ class Beneficiary extends Model
     /**
      * The attributes that are mass assignable.
      */
-    protected $fillable = [];
+    protected $guarded = [];
+
+    protected $casts = [
+        "address" => "array",
+        "beneficiary" => "array",
+        "payment_object" => "array"
+    ];
     
     protected static function newFactory(): BeneficiaryFactory
     {

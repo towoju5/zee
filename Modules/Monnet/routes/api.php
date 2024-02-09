@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Modules\Monnet\app\Http\Controllers\MonnetController;
 
 /*
     |--------------------------------------------------------------------------
@@ -15,5 +16,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware(['auth:api'])->prefix('v1')->name('api.')->group(function () {
-    Route::get('monnet', fn (Request $request) => $request->user())->name('monnet');
+    // Route::get('monnet', fn (Request $request) => $request->user())->name('monnet');
+
+    Route::get('payout/test', [MonnetController::class, 'payout']);
 });

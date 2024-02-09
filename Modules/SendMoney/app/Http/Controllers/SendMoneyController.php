@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Services\PaymentService;
 use App\Services\PayoutService;
 use Illuminate\Http\Request;
+use Modules\Beneficiary\app\Models\Beneficiary;
 use Modules\SendMoney\app\Models\SendMoney;
 use Modules\SendMoney\app\Models\SendQuote;
 use Modules\SendMoney\app\Notifications\SendMoneyNotification;
@@ -75,6 +76,15 @@ class SendMoneyController extends Controller
 				'transfer_purpose' 	=>	'sometimes',
 			]);
 
+			$beneficiary = Beneficiary::where([
+				"user_id" => active_user(),
+				"id" => $request->beneficiary_id
+			])->first();
+
+			if(!$beneficiary) {
+				return get_error_response(['error' => "Beneficiary not found"]);
+			}
+
 			$check_send_gateway = self::method_exists($request->send_gateway, $request->send_currency, 'deposit');
 			$check_receive_gateway = self::method_exists($request->receive_gateway, $request->receive_currency, 'payout');
 
@@ -93,17 +103,18 @@ class SendMoneyController extends Controller
 				$validate['id'] = '2111';
 			}
 
-			// return $validate;
+			$validate;
 
 			if($send = SendQuote::create($validate)){
 				// add transaction history
 				// @dispatch(new SendMoneyQuoteNotification($send, 'send_money'));
 				// @$user->notify(new SendMoneyNotification($send));
-				return get_success_response($send);
+				$result = SendQuote::with('beneficiary')->whereId($send->id)->first();
+				return get_success_response($result);
 			}
 			return get_error_response(['error' => 'Unable to process send request please contact support']);
 		} catch (\Throwable $th) {
-			get_error_response(['error' => $th->getMessage()]);
+			return get_error_response(['error' => $th->getMessage()]);
 		}
 	}
 

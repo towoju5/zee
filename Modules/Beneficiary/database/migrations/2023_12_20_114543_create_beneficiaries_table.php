@@ -14,8 +14,12 @@ return new class extends Migration
         Schema::create('beneficiaries', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users');
-            $table->string('method');
+            $table->string('nickname');
+            $table->string('mode');
+            $table->string('currency');
+            $table->json('address');
             $table->json('beneficiary');
+            $table->json('payment_object');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
             $table->timestamp('deleted_at')->nullable();

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Modules\Beneficiary\app\Models\Beneficiary;
+use Modules\Monnify\App\Services\MonnifyService;
 
 class BeneficiaryController extends Controller
 {

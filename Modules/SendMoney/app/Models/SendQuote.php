@@ -5,6 +5,7 @@ namespace Modules\SendMoney\app\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Beneficiary\app\Models\Beneficiary;
 use Modules\SendMoney\Database\factories\SendQuoteFactory;
 
 class SendQuote extends Model
@@ -31,6 +32,11 @@ class SendQuote extends Model
         'total_amount' => 'float',
         'raw_data' => 'object',
     ];
+
+    public function beneficiary()
+    {
+        return $this->belongsTo(Beneficiary::class);
+    }
 
     public function details()
     {
