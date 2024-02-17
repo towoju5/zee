@@ -29,7 +29,7 @@ class CoinPaymentsController extends Controller
         $currency2 = $request->crypto;
         $buyer_email = $request->user()->email;
         $response = $this->coinpayments->CreateTransactionSimple($amount, $currency1, $currency2, $buyer_email);
-        updateSendMoneyRawData($quoteId, $response);
+        updateSendMoneyRawData($quoteId, $response);l
         return $response['result'] ?? [];
     }
 

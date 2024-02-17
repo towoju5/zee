@@ -1,6 +1,8 @@
 <?php
 
+use App\Models\Balance;
 use App\Models\settings;
+use App\Models\User;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -97,8 +99,11 @@ if (!function_exists('settings')) {
 if (!function_exists('get_current_balance')) {
     function get_current_balance($currency)
     {
-        // return true;
-        return $currency;
+        $where = [
+            'currency' => $currency,
+            'user_id' => active_user()
+        ];
+        $current_balance = Balance::where($where)->latest()->first();
     }
 }
 
@@ -118,6 +123,26 @@ if (!function_exists('getExchangeVal')) {
     {
         // return true;
         return 1;
+    }
+}
+
+if (!function_exists('per_page')) {
+    /**
+     * Get and return the exchange rate
+     */
+    function per_page($perpage = null)
+    {
+        return $perPage ?? 10;
+    }
+}
+
+if (!function_exists('user')) {
+    /**
+     * Get and return the exchange rate
+     */
+    function user()
+    {
+        return User::find(auth()->id());
     }
 }
 

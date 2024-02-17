@@ -118,4 +118,11 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->hasMany(Withdraw::class);
     }
+
+    protected function scopeWithMetas()
+    {
+        return $this->hasMany(UserMeta::class)->where(function() use (&$query) {
+            $query->where('user_id', auth()->id())->get();
+        });
+    }
 }

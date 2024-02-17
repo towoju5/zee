@@ -10,13 +10,14 @@ use Illuminate\Notifications\Notification;
 class SendCompleteNotification extends Notification
 {
     use Queueable;
+    public $data;
 
     /**
      * Create a new notification instance.
      */
-    public function __construct()
+    public function __construct($data)
     {
-        //
+        $this->data = $data;
     }
 
     /**
@@ -26,7 +27,7 @@ class SendCompleteNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['mail', 'database'];
     }
 
     /**

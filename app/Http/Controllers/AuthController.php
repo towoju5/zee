@@ -89,7 +89,7 @@ class AuthController extends Controller implements UpdatesUserProfileInformation
 
         // Create a new user
         $validator['password'] = bcrypt($request->password);
-        $validator['raw_data'] = $request->all();
+        $validator['raw_data'] = $request->except(['password']);
         $user = User::create($validator);
 
         if($user) {
@@ -202,23 +202,23 @@ class AuthController extends Controller implements UpdatesUserProfileInformation
     {
         $user = User::findorfail(active_user());
         $user->update(array_filter([
-            "name"          =>  $request->name,
-            "bussinessName" =>  $request->bussinessName,
-            "firstName"     =>  $request->firstName,
-            "lastName"      =>  $request->lastName,
-            "phoneNumber"   =>  $request->phoneNumber,
-            "city"          =>  $request->city,
-            "state"         =>  $request->state,
-            "country"       =>  $request->country,
-            "zipCode"       =>  $request->zipCode,
-            "street"        =>  $request->street,
-            "additionalInfo"=>  $request->additionalInfo,
-            "houseNumber"   =>  $request->houseNumber,
-            "idNumber"      =>  $request->idNumber,
-            "idType"        =>  $request->idType,
-            "idIssuedAt"    =>  $request->idIssuedAt,
-            "idExpiryDate"  =>  $request->idExpiryDate,
-            "idIssueDate"   =>  $request->idIssueDate,
+            "name"          =>  $request->name ?? $user->name,
+            "bussinessName" =>  $request->bussinessName ?? $user->bussinessName,
+            "firstName"     =>  $request->firstName ?? $user->firstName,
+            "lastName"      =>  $request->lastName ?? $user->lastName,
+            "phoneNumber"   =>  $request->phoneNumber ?? $user->phoneNumber,
+            "city"          =>  $request->city ?? $user->city,
+            "state"         =>  $request->state ?? $user->state,
+            "country"       =>  $request->country ?? $user->country,
+            "zipCode"       =>  $request->zipCode ?? $user->zipCode,
+            "street"        =>  $request->street ?? $user->street,
+            "additionalInfo"=>  $request->additionalInfo ?? $user->additionalInfo,
+            "houseNumber"   =>  $request->houseNumber ?? $user->houseNumber,
+            "idNumber"      =>  $request->idNumber ?? $user->idNumber,
+            "idType"        =>  $request->idType ?? $user->idType,
+            "idIssuedAt"    =>  $request->idIssuedAt ?? $user->idIssuedAt,
+            "idExpiryDate"  =>  $request->idExpiryDate ?? $user->idExpiryDate,
+            "idIssueDate"   =>  $request->idIssueDate ?? $user->idIssueDate,
         ]));
 
         if($request->hasFile('verificationDocument')) {

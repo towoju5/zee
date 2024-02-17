@@ -20,6 +20,10 @@ class Deposit extends Model
         'payment_gateway_id',
         'meta',
     ];
+
+    protected $casts =  [
+        'meta' => 'array'
+    ];
     
     /**
      * The attributes that should be hidden for serialization.

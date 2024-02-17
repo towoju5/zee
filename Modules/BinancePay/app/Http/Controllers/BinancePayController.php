@@ -36,7 +36,7 @@ class BinancePayController extends Controller
                     'goodsName' => 'Wallet TopUp',
                     'goodsDetail' => 'Wallet Topup for customer ' . auth()->user()->businessName,
                 ],
-                'returnUrl' => 'https://zeenahpay.com/dashboard',
+                'returnUrl' => getenv('APP_URL').'dashboard',
                 'webhookUrl' => 'https://api.zinar.io/api/binance-webhook',
             ];
 
