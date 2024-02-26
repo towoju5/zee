@@ -192,7 +192,7 @@ if (!function_exists('uuid')) {
      */
     function uuid($length = 8)
     {
-        // return strtoupper(Str::random($length));
+        return strtoupper(Str::random($length));
         return sprintf(
             '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
 

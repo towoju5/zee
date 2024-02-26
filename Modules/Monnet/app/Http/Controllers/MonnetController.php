@@ -31,10 +31,11 @@ class MonnetController extends Controller
         return http_response_code(200);
     }
 
-    public function payout()
+    public function payout(Request $request)
     {
         $monnet = new MonnetServices();
-        $checkout = $monnet->payout();
+        $beneficiaryId = 1;
+        $checkout = $monnet->payout($request->amount, $request->currency, $beneficiaryId);
         return $checkout;
     }
 }

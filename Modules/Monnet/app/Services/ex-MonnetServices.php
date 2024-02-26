@@ -9,48 +9,58 @@ use Modules\Beneficiary\app\Models\Beneficiary;
 
 class MonnetServices
 {
-    public function payout($amount, $currency, $beneficiaryId = null)
+    public function payout($beneficiaryId = null)
     {
         try {
-            $beneficiary = Beneficiary::whereId($beneficiaryId)->whereUserId(auth()->id())->first();
-            if(!$beneficiary) {
-                return get_error_response(['error' => "Beneficiary not found"]);
-            }
+            // $data = self::buildPayoutPayload($beneficiaryId);
+            // $send = self::api_call("POST", "payouts", $data);
+            // return $send;
+            // $data['payoutDataArg'] = $this->buildPayout('ARG', 100000, 'ARS', 'R123456', 'FreeTextFreeTextFreeTextFreeText', '002', '1', null, '002123456789123456');
+            // $data['payoutDataMex'] = $this->buildPayout('MEX', 100000, 'MXN', 'R123456', 'FreeTextFreeTextFreeTextFreeText', '002', '1', null, null, '002123456789123456');
+            // $data['payoutDataOther'] = $this->buildPayout('PER', 100000, 'PEN', 'R123456', 'FreeTextFreeTextFreeTextFreeText', '001', '1', '00000000000');
+            // $data['payoutDataOther'];
+            // $merchantId = "125";
+            // $HTTPmethod = "POST";
+            // $timestamp = "?timestamp=".time();
+            // $resourcePath = "api/v1/{$merchantId}/payouts".$timestamp;
+            // $apiSecret = "yHVNUu6tLqJH8xiSppn9Gg8yAUOhY15xWQfuw3L4Jis=";
+            // $hashedBody = hash_hmac('sha256', json_encode($data['payoutDataOther']), $apiSecret);
+            // $message = "$HTTPmethod:$resourcePath:$hashedBody";
+            // $signature = hash_hmac('sha256', $message, $apiSecret);
 
-            $country_data = self::getPaymentData($currency);
-            $customer  = (object)[];
+            // $endpoint = "https://cert.api.payout.monnet.io/$resourcePath&signature=$signature";
+            // $request = Http::withHeaders([
+            //     'monnet-api-key' => 'G9daslndjmf2XZtbyeboxIwtq1OopE7nji28jRdt4P4=',
+            //     'Content-Type' => 'application/json',
+            // ])->post($endpoint, $data['payoutDataOther'])->json();
+            // $response = to_array($request);
+            // return response()->json($response);
+
+
+            $merchantId = "125";
+            $HTTPmethod = "POST";
+            $timestamp = "?timestamp=" . time();
+            $resourcePath = "api/v1/{$merchantId}/payouts" . $timestamp;
             $apiSecret = "yHVNUu6tLqJH8xiSppn9Gg8yAUOhY15xWQfuw3L4Jis=";
-            $HTTPmethod =    "POST";
-            $resourcePath   =  "/api/v1/125/payouts";
-            $timestamp  =     "?timestamp=".time();
-            $request = request();
-            
-            if(in_array($currency, ['ARS'])) {
-                $body = $this->buildPayout($country_data['country'], $amount, $currency, 'R123456', 'FreeTextFreeTextFreeTextFreeText', '002', '1', null, '002123456789123456');
-                // $body = $this->buildPayout('ARG', $amount, $currency, uuid(), $request->description ?? 'Payout request', $customer->bankCode, $customer->accountType, null, $customer->accountNumber);
-            } else if(in_array($currency, ['MXN'])) {
-                $body = $this->buildPayout($country_data['country'], $amount, $currency, 'R123456', 'FreeTextFreeTextFreeTextFreeText', '002', '1', null, null, '002123456789123456');
-                // $body = $this->buildPayout('MEX', $amount, $currency, uuid(), $request->description ?? 'Payout request', $customer->bankCode, $customer->accountType, null, null, $customer->accountNumber);
-            } else {
-                $body = $this->buildPayout($country_data['country'], $amount, $currency, uuid(8), 'FreeTextFreeTextFreeTextFreeText', '001', '1', '00000000000');
-                $body = $this->buildPayout('PER', 100000, 'PEN', 'R123456', 'FreeTextFreeTextFreeTextFreeText', '001', '1', '00000000000');
-            }
-            $sample_hashedBody = hash('sha256', json_encode($body), false);
-            $_data = $HTTPmethod.':'.$resourcePath.$timestamp.':'.$sample_hashedBody;
-            $signature = hash_hmac('sha256', $_data, $apiSecret);
-            // return $body; exit;
-            $endpoint = 'https://cert.api.payout.monnet.io'.$resourcePath.$timestamp.'&signature='.$signature;
-            $payoutDataOther = $body;
+
+            $payoutDataOther = $this->buildPayout('PER', 100000, 'PEN', 'R123456', 'FreeTextFreeTextFreeTextFreeText', '001', '1', '00000000000');
+            $hashedBody = hash('sha256', json_encode($payoutDataOther), false);
+
+            return $message = "$HTTPmethod:$resourcePath:$hashedBody";
+            $signature = hash_hmac('sha256', $message, $apiSecret);
+
+            $endpoint = "https://cert.api.payout.monnet.io/$resourcePath&signature=$signature";
+
             $response = Http::withHeaders([
                 'monnet-api-key' => 'G9daslndjmf2XZtbyeboxIwtq1OopE7nji28jRdt4P4=',
                 'Content-Type' => 'application/json',
             ])->post($endpoint, $payoutDataOther)->json();
 
-            // Log::info(json_encode($payoutDataOther));
-            // Log::info($body);
-            // Log::info($_data);
+            Log::info(json_encode($payoutDataOther));
+            Log::info($hashedBody);
+            Log::info($message);
 
-            return get_success_response($response);
+            return response()->json($response);
             
         } catch (\Throwable $th) {
             return ['error' => $th->getMessage()];
@@ -72,7 +82,6 @@ class MonnetServices
         $request = request();
         $user = $request->user();
         $payment_data = self::getPaymentData($currency);
-        // echo json_encode($payment_data); exit;
         $txn = uuid();
         $amount = convertIntToDecimal($amount);
         $key = $payment_data['merchantKey'];
@@ -126,11 +135,8 @@ class MonnetServices
     {
         try {
             $data = self::buildPayinPayload($amount, $currency);
-            return $request = Http::post(getenv("MONNET_PAYIN__URL"), $data)->json();
-            updateSendMoneyRawData($quoteId, [
-                'user_request' =>  $data,
-                'gateway_response' => to_array($request)
-            ]);
+            $request = Http::post(getenv("MONNET_PAYIN__URL"), $data)->json();
+            updateSendMoneyRawData($quoteId, $data);
             $response = to_array($request);
             return $response["url"];
         } catch (\Throwable $th) {
@@ -169,21 +175,21 @@ class MonnetServices
             ],
             'destination' => [
                 'bankAccount' => [
-                    'bankCode' => $customer->destination->bankAccount->bank_code ?? null,
-                    'accountType' => $customer->destination->bankAccount->accountType ?? null,
-                    'accountNumber' => $customer->destination->bankAccount->accountNumber ?? null,
-                    'alias' => $customer->destination->bankAccount->alias ?? null,
-                    'cbu' => $customer->destination->bankAccount->cbu ?? null,
-                    'cci' => $customer->destination->bankAccount->cci ?? null,
-                    'clave' => $customer->destination->bankAccount->clave ?? null,
+                    'bankCode' => $customer->destination->bankAccount->bank_code,
+                    'accountType' => $customer->destination->bankAccount->accountType,
+                    'accountNumber' => $customer->destination->bankAccount->accountNumber,
+                    'alias' => $customer->destination->bankAccount->alias,
+                    'cbu' => $customer->destination->bankAccount->cbu,
+                    'cci' => $customer->destination->bankAccount->cci,
+                    'clave' => $customer->destination->bankAccount->clave,
                     'location' => [
-                        'street' => $customer->destination->bankAccount->location->street ?? null,
-                        'houseNumber' => $customer->destination->bankAccount->location->houseNumber ?? null,
-                        'additionalInfo' => $customer->destination->bankAccount->location->additionalInfo ?? null,
-                        'city' => $customer->destination->bankAccount->location->city ?? null,
-                        'province' => $customer->destination->bankAccount->location->province ?? null,
-                        'country' => $customer->destination->bankAccount->location->country ?? null,
-                        'zipCode' => $customer->destination->bankAccount->location->zipCode ?? null,
+                        'street' => $customer->destination->bankAccount->location->street,
+                        'houseNumber' => $customer->destination->bankAccount->location->houseNumber,
+                        'additionalInfo' => $customer->destination->bankAccount->location->additionalInfo,
+                        'city' => $customer->destination->bankAccount->location->city,
+                        'province' => $customer->destination->bankAccount->location->province,
+                        'country' => $customer->destination->bankAccount->location->country,
+                        'zipCode' => $customer->destination->bankAccount->location->zipCode,
                     ],
                 ],
             ],
@@ -203,35 +209,42 @@ class MonnetServices
      */
     private function buildPayout($country, $amount, $currency, $orderId, $description, $bankCode, $accountType, $accountNumber = null, $cbu = null, $clave = null, $extraDetails = [])
     {
-        // var_dump($cbu); exit;
-        // return [
-        //     'country' => 'PER',
-        //     'currency' => 'PEN',
-        //     'amount' => 50,
-        //     'orderId' => uuid(8),
-        //     'beneficiary' => [
-        //       'name' => 'jose',
-        //       'lastName' => 'fernández',
-        //       'email' => 'jose.valdes@calimaco.com',
-        //       'document' => [
-        //         'type' => 1,
-        //         'number' => 25323925,
-        //       ],
-        //     ],
-        //     'destination' => [
-        //       'bankAccount' => [
-        //         'bankCode' => '003',
-        //         'accountType' => 2,
-        //         'cci' => '00389898767676767273',
-        //       ],
-        //     ],
-        // ];
+        return [
+            'country' => 'PER',
+            'currency' => 'PEN',
+            'amount' => 50,
+            'orderid' => '1-30005-atp',
+            'beneficiary' => [
+              'name' => 'jose',
+              'lastname' => 'fernández',
+              'email' => 'jose.valdes@calimaco.com',
+              'document' => [
+                'type' => 1,
+                'number' => '05323925W',
+              ],
+            ],
+            'destination' => [
+              'bankAccount' => [
+                'bankCode' => '003',
+                'accountType' => 2,
+                'cci' => '8983594178739',
+              ],
+            ],
+        ];
         $bankAccount = [
             'bankCode' => $bankCode,
             'accountType' => $accountType,
         ];
 
         // Add appropriate bank account details based on the country's requirements
+        if ($country === 'ARG' && $cbu !== null) {
+            $bankAccount['cbu'] = $cbu;
+        } elseif ($country === 'MEX' && $clave !== null) {
+            $bankAccount['clave'] = $clave;
+        } elseif ($accountNumber !== null) {
+            $bankAccount['accountNumber'] = $accountNumber;
+        }
+
         $body = [
             'country' => $country,
             'amount' => $amount,
@@ -244,23 +257,13 @@ class MonnetServices
                 'email' => 'test@test.com',
                 'document' => [
                     'type' => 1,
-                    'number' => '33446836928',
+                    'number' => '33446836',
                 ],
             ],
             'destination' => [
                 'bankAccount' => $bankAccount,
             ],
         ];
-        if ($currency === 'ARS' && $cbu !== null) {
-            $body['destination']['bankAccount']['cbu'] = $cbu;
-        } elseif ($currency === 'MXN' && $clave !== null) {
-            $body['destination']['bankAccount']['clave'] = $clave;
-        } elseif ($accountNumber !== null) {
-            $body['destination']['bankAccount']['accountNumber'] = $accountNumber;
-        }
-
-
-        return response()->json($body);  exit;
 
         return $body;
     }
@@ -536,7 +539,6 @@ class MonnetServices
                 $data = [
                     "merchantId" => getenv("MONNET_COLUMBIA_ID"),
                     "merchantKey" => getenv("MONNET_COLUMBIA"),
-                    "country" =>    "COL"
                 ];
                 break;
 
@@ -544,7 +546,7 @@ class MonnetServices
                 $data = [
                     "merchantId" => getenv("MONNET_PERU_ID"),
                     "merchantKey" => getenv("MONNET_PERU"),
-                    "country" =>    "PER"
+                    // "region" => "Lima"
                 ];
                 break;
 
@@ -552,7 +554,6 @@ class MonnetServices
                 $data = [
                     "merchantId" => getenv("MONNET_ECUADO_ID"),
                     "merchantKey" => getenv("MONNET_ECUADO"),
-                    "country" =>    "USD"
                 ];
                 break;
 
@@ -560,7 +561,6 @@ class MonnetServices
                 $data = [
                     "merchantId" => getenv("MONNET_CHILE_ID"),
                     "merchantKey" => getenv("MONNET_CHILE"),
-                    "country" =>    "CLP"
                 ];
                 break;
 
@@ -568,7 +568,6 @@ class MonnetServices
                 $data = [
                     "merchantId" => getenv("MONNET_ARGENTINA_ID"),
                     "merchantKey" => getenv("MONNET_ARGENTINA"),
-                    "country" =>    "ARG"
                 ];
                 break;
 
@@ -576,7 +575,6 @@ class MonnetServices
                 $data = [
                     "merchantId" => getenv("MONNET_MEXICO_ID"),
                     "merchantKey" => getenv("MONNET_MEXICO"),
-                    "country" =>    "MEX"
                 ];
                 break;
 
@@ -585,7 +583,6 @@ class MonnetServices
                 $data = [
                     "merchantId" => getenv("MONNET_ECUADO_ID"),
                     "merchantKey" => getenv("MONNET_ECUADO"),
-                    "country" =>    "USD"
                 ];
                 break;
         }

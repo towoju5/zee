@@ -14,7 +14,7 @@ class ShuftiProController extends Controller
     {
         try {
             $shufti = new ShuftiProServices();
-            $process = $shufti->init(request());
+            $process = $shufti->init($request);
             return $process;
         } catch (\Throwable $th) {
             return get_error_response(['error' => $th->getMessage()]);

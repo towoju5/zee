@@ -25,6 +25,8 @@ return new class extends Migration
             $table->string('transfer_purpose')->nullable();
             $table->string('rate')->nullable();
             $table->string('total_amount')->nullable();
+            $table->string('fee')->nullable();
+            $table->json('charges')->nullable();
             $table->json('raw_data')->nullable();
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();

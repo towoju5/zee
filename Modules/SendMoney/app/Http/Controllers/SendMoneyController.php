@@ -92,16 +92,22 @@ class SendMoneyController extends Controller
 				return get_error_response(['error' => 'Unknown gateway or unsupported currency selected']);
 			}
 
+			// add user IP address to request
+			$request->merge([
+				'ip_address' => $request->ip()
+			]);
+
 			$user = User::find(active_user());
 			$validate['rate'] = null;
 			$validate['user_id'] = active_user();
 			$validate['total_amount'] = null;
 			$validate['raw_data'] = $request->all();
 
-			// calulate quote fees
 			if(SendQuote::get()->count() < 1) {
 				$validate['id'] = '2111';
 			}
+			
+			// calulate quote fees
 
 			$validate;
 
