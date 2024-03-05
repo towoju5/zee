@@ -17,6 +17,4 @@ use Modules\Monnet\app\Http\Controllers\MonnetController;
 
 Route::middleware(['auth:api'])->prefix('v1')->name('api.')->group(function () {
     // Route::get('monnet', fn (Request $request) => $request->user())->name('monnet');
-
-    Route::post('wallet/payout', [MonnetController::class, 'payout']);
 });

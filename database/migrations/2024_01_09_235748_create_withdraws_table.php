@@ -15,8 +15,11 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users');
             $table->string('amount');
+            $table->string('currency');
+            $table->string('beneficiary_id');
+            $table->string('gateway');
             $table->string('status')->default('pending');
-            $table->json('data')->nullable();
+            $table->json('raw_data')->nullable();
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
             $table->timestamp('deleted_at')->nullable();

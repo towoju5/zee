@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Modules\Beneficiary\app\Models\Beneficiary;
 use Modules\Monnet\app\Services\MonnetServices;
 use Modules\Monnify\App\Services\MonnifyService;
 
@@ -34,8 +35,14 @@ class MonnetController extends Controller
     public function payout(Request $request)
     {
         $monnet = new MonnetServices();
-        $beneficiaryId = 1;
-        $checkout = $monnet->payout($request->amount, $request->currency, $beneficiaryId);
+        $beneficiaryId = $request->beneficiary_id;
+
+        $beneficiary = Beneficiary::whereId($beneficiaryId)->whereUserId(auth()->id())->first();
+        if (!$beneficiary) {
+            return get_error_response(['error' => "Beneficiary not found"]);
+        }
+
+        $checkout = $monnet->payout($request->amount, $request->currency, $beneficiaryId );
         return $checkout;
     }
 }

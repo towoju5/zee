@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Jobs\Transaction;
 use App\Models\Deposit;
+use App\Services\DepositService;
 use App\Services\PaymentService;
 use Illuminate\Http\Request;
 
@@ -30,11 +31,13 @@ class DepositController extends Controller
     public function store(Request $request)
     {
         try {
-            $request->validate([
-                'gateway' => 'required',
-                'amount' => 'required',
-                'currency' => 'required'
-            ]);
+            $request->validate(
+                [
+                    'gateway' => 'required',
+                    'amount' => 'required',
+                    'currency' => 'required'
+                ]
+            );
 
             // record deposit info into the DB
             $deposit = new Deposit();
@@ -42,13 +45,19 @@ class DepositController extends Controller
             $deposit->amount = $request->amount;
             $deposit->gateway = $request->gateway;
             $deposit->currency = $request->currency;
-            if($deposit->save()){
+            if ($deposit->save()) {
+                // return response()->json($deposit); exit;
                 // add transaction history
                 Transaction::dispatch($deposit->toArray(), 'deposit');
                 // now call the payment endpoint
-                $payment = new PaymentService(); 
-                $callback = $payment->makePayment($request->amount, $request->currency, $request->gateway);
-                return get_success_response($callback);
+                $payment = new DepositService(); 
+                $callback = $payment->makeDeposit($request->gateway, $request->currency, $request->amount, $deposit);
+                return get_success_response(
+                    [
+                        'deposit_url' => $callback,
+                        'deposit_data' => $deposit
+                    ]
+                );
             }
         } catch (\Throwable $th) {
             return get_error_response(['error' => $th->getMessage()]);
@@ -62,7 +71,7 @@ class DepositController extends Controller
     {
         try {
             $deposit = Deposit::whereUserId(active_user())->where(['id' => $id])->first();
-            if(!$deposit) return get_error_response(['error' => "Transaction not found"]);
+            if (!$deposit) return get_error_response(['error' => "Transaction not found"]);
             return get_success_response($deposit);
         } catch (\Throwable $th) {
             return get_error_response(['error' => $th->getMessage()]);

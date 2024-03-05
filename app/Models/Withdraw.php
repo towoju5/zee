@@ -23,7 +23,8 @@ class Withdraw extends Model
     ];
 
     protected $casts =  [
-        'data' => 'array'
+        'raw_data' => 'array',
+        'is_send_money' => 'boolean'
     ];
 
     public function transactions()

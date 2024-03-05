@@ -5,8 +5,10 @@ use App\Http\Controllers\DepositController;
 use App\Http\Controllers\Google2faController;
 use App\Http\Controllers\MagicLinkController;
 use App\Http\Controllers\MiscController;
+use App\Http\Controllers\PinVerificationController;
 use App\Http\Controllers\UserMetaController;
 use App\Http\Controllers\WalletController;
+use App\Http\Controllers\WithdrawalConntroller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -52,6 +54,9 @@ Route::group(['prefix'  => 'v1/auth'], function(){
 
 Route::middleware(['auth:api'])->prefix('v1')->name('api.')->group(function () {
 
+    Route::post('pin/verify', [PinVerificationController::class, 'verifyPin']);
+    Route::post('pin/update', [PinVerificationController::class, 'updatePin']);
+
     Route::group(['middleware' => 'google2fa'], function () {
         Route::post('generate-2fa-secret', [Google2faController::class, 'generateSecret']);
         Route::post('enable-2fa', [Google2faController::class, 'enable2fa']);
@@ -78,7 +83,11 @@ Route::middleware(['auth:api'])->prefix('v1')->name('api.')->group(function () {
         });
 
         Route::post('zeenah-transfer', [WalletController::class, 'zeenahTransfer']);
-        Route::get('withdrawals',   [WalletController::class, 'withdrawals']);
+
+        Route::get('payouts',       [WalletController::class, 'index']);
+        Route::post('payout',       [WithdrawalConntroller::class, 'store']);
+        Route::get('payout/{id}',   [WithdrawalConntroller::class, 'getWithdrawalStatus']);
+        
         Route::get('balance',       [WalletController::class, 'balance']);
     });
 });

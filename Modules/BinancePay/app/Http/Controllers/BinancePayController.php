@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Http;
 
 class BinancePayController extends Controller
 {
-    public function init(int $quoteId, float $amount, string $currency)
+    public function init(int $quoteId = null, float $amount, string $currency)
     {
         try {
             $trxId = uuid();
@@ -34,10 +34,10 @@ class BinancePayController extends Controller
                     'goodsCategory' => 'Z000',
                     'referenceGoodsId' => '7876763A3B',
                     'goodsName' => 'Wallet TopUp',
-                    'goodsDetail' => 'Wallet Topup for customer ' . auth()->user()->businessName,
+                    'goodsDetail' => 'Wallet Topup for customer ' . auth()->user()?->businessName,
                 ],
                 'returnUrl' => getenv('APP_URL').'dashboard',
-                'webhookUrl' => 'https://api.zinar.io/api/binance-webhook',
+                'webhookUrl' => url('/api/binance-webhook'),
             ];
 
             $call = $this->api_call('/binancepay/openapi/v2/order', 'POST', $payload);
@@ -50,20 +50,22 @@ class BinancePayController extends Controller
             // balance  before after
             $bba = get_current_balance($currency);
 
-            $deposit = Deposit::create([
-                "user_id" => $user->id,
-                'deposit_id' => $trxId,
-                'deposit_fee' => $fee,
-                "fiat" => $currency,
-                "amount" => $amount,
-                "cryptoAmount" => number_format($amountInCrypto, 8),
-                "wallet_type" => "USDT",
-                "wallet_address" => $apiRequest,
-                "timeout" => now()->addMinutes(30),
-                "raw_data" => $call,
-                "balance_before" => $bba['before'],
-                "balance_after" => $bba['after'],
-            ]);
+            $deposit = Deposit::create(
+                [
+                    "user_id" => $user->id,
+                    'deposit_id' => $trxId,
+                    'deposit_fee' => $fee,
+                    "fiat" => $currency,
+                    "amount" => $amount,
+                    "cryptoAmount" => number_format($amountInCrypto, 8),
+                    "wallet_type" => "USDT",
+                    "wallet_address" => $apiRequest,
+                    "timeout" => now()->addMinutes(30),
+                    "raw_data" => $call,
+                    "balance_before" => $bba['before'],
+                    "balance_after" => $bba['after'],
+                ]
+            );
 
             $deposit['id'] = $deposit->id;
 
@@ -87,10 +89,16 @@ class BinancePayController extends Controller
 
                 Transaction::create($deposit_data);
                 
-                updateSendMoneyRawData($quoteId, $call);
+                if (null != $quoteId) :
+                    updateSendMoneyRawData($quoteId, $call);
+                endif;
                 return $call;
             } else {
-                return get_error_response(["error" => "Unable to initiate deposit action."]);
+                return get_error_response(
+                    [
+                        "error" => "Unable to initiate deposit action."
+                    ]
+                );
             }
         } catch (\Throwable $th) {
             return get_error_response($th->getMessage(), 500);

@@ -25,22 +25,25 @@ class WalletController extends Controller
     public function deposits()
     {
         try {
-            $deposits = Deposit::whereUserId(active_user())->with('transaction')->get();
+            $deposits = Deposit::whereUserId(active_user())->with('transaction')->paginate(per_page());
             return get_success_response($deposits);
         } catch (\Throwable $th) {
             return get_error_response(['error' => $th->getMessage()]);
         }
     }
 
-    public function withdrawals()
-    {
-        try {
-            $payouts = Deposit::whereUserId(active_user())->with('transaction')->get();
-            return get_success_response($payouts);
-        } catch (\Throwable $th) {
-            return get_error_response(['error' => $th->getMessage()]);
-        }
-    }
+    /**
+     * Moved to withdrawal controller
+     */
+    // public function withdrawals()
+    // {
+    //     try {
+    //         $payouts = Withdraw::whereUserId(active_user())->with('transaction')->paginate(per_page());
+    //         return get_success_response($payouts);
+    //     } catch (\Throwable $th) {
+    //         return get_error_response(['error' => $th->getMessage()]);
+    //     }
+    // }
 
     public function zeenahTransfer(Request $request)
     {
@@ -51,20 +54,22 @@ class WalletController extends Controller
                 'currency' => 'required',
             ]);
 
-            // check sender balance
             $user = $request->user();
-            $sender_balance = Balance::whereUserId($user->id)->where('currency_symbol', $request->currency)->first();
-            if ($sender_balance < $request->amount) {
-                return get_error_response(['error' => 'Insufficient wallet balance']);
+            if ($request->email == $user->email) {
+                return get_error_response(['error' => "Sorry you can't transfer to yourself"]);
             }
+
             $receiver = User::whereEmail($request->email)->first();
             if (!$receiver) {
                 return get_error_response(['error' => 'Invalid receiver provided']);
             }
+
+            // check sender balance
+            $sender_balance = Balance::whereUserId($user->id)->where('currency_symbol', $request->currency)->first();
+            if ($sender_balance < $request->amount) {
+                return get_error_response(['error' => 'Insufficient wallet balance']);
+            }
             $receiver_balance = Balance::whereUserId($user->id)->where('currency_symbol', $request->currency)->first();
-            // if(!$receiver_balance)  {
-            //     // create the wallet
-            // }
             $receiver_balance->balance = floatval($receiver_balance->balance + $request->amount);
             $receiver_balance->save();
 

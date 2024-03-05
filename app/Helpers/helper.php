@@ -1,6 +1,8 @@
 <?php
 
 use App\Models\Balance;
+use App\Models\Country;
+use App\Models\Deposit;
 use App\Models\settings;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
@@ -155,6 +157,17 @@ if (!function_exists('gateways')) {
     {
         // return true;
         return 1;
+    }
+}
+
+if (!function_exists('user')) {
+    function user()
+    {
+        if(!auth()->check()) {
+            return null;
+        }
+
+        return auth()->user();
     }
 }
 
@@ -415,19 +428,35 @@ if(!function_exists('get_iso2')) {
      */
     function get_iso2($country)
     {
-        // $country = Country::whereUuid($country);
-        // return $country-->iso2;
+        $country = Country::whereUuid($country);
+        return $country->iso2;
     }
 }
 
 if(!function_exists('updateSendMoneyRawData')) {
     /**
-     * @return country 2 codes identifier
+     * @return void
      */
     function updateSendMoneyRawData($quoteId, $data) : void
     {
-        SendMoney::whereid($quoteId)->update([
-            'raw_data' => $data
-        ]);
+        SendMoney::whereid($quoteId)->update(
+            [
+                'raw_data' => $data
+            ]
+        );
+    }
+}
+
+if(!function_exists('updateDepositRawData')) {
+    /**
+     * @return void
+     */
+    function updateDepositRawData($depositId, $data) : void
+    {
+        Deposit::whereid($depositId)->update(
+            [
+                'raw_data' => $data
+            ]
+        );
     }
 }

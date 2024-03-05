@@ -41,7 +41,8 @@ class BeneficiaryController extends Controller
                 "nickname" => "required",
                 "currency" => "required",
                 "beneficiary" => "required",
-                "payment_object" => "required",
+                "destination" => "sometimes",
+                "payment_object" => "sometimes",
             ]);
 
             $data['user_id']        = active_user();
@@ -50,13 +51,13 @@ class BeneficiaryController extends Controller
             $data['currency']       = $request->currency;
             $data['address']        = $request->address;
             $data['beneficiary']    = $request->beneficiary;
-            $data['payment_object'] = $request->payment_object;
+            $data['payment_object'] = $request->payment_object ?? $request->destination;
 
-            if(Beneficiary::create($data)) {
-                if(isApi())
-                    return get_success_response($data);
+            if ($save = Beneficiary::create($data)) {
+                if (isApi())
+                    return get_success_response($save);
 
-                return $data;
+                return $save;
             }
             return get_error_response(['error' => 'Currently unable to add new beneficiaries']);
         } catch (\Throwable $th) {
@@ -105,7 +106,7 @@ class BeneficiaryController extends Controller
     {
         try {
             $beneficiary = Beneficiary::whereUserId(active_user())->where('id', $id)->first();
-            if($beneficiary->delete()) {
+            if ($beneficiary->delete()) {
                 return get_success_response(['msg' => 'Beneficiary deleted successfully']);
             }
             return get_error_response(['error', "Beneficiary with the provided data not found"]);
