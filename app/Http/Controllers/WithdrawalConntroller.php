@@ -30,13 +30,13 @@ class WithdrawalConntroller extends Controller
                 'currency' => 'required',
             ]);
 
-            $is_beneficiary = Beneficiary::where(['user_id' => active_user(), 'id' => $request->beneficiary_id])->count();
-            if ($is_beneficiary < 1) {
+            $is_beneficiary = Beneficiary::where(['user_id' => active_user(), 'id' => $request->beneficiary_id])->first();
+            if (!$is_beneficiary) {
                 return get_error_response(['error' => "Invalid beneficiary"]);
             }
             $valitdate['user_id'] = auth()->id();
             $valitdate['raw_data'] = $request->all();
-
+            $validate['receive_gateway'] = $is_beneficiary->mode;
             if ($create = Withdraw::create($valitdate)) {
                 $monnet = new MonnetServices();
                 $beneficiaryId = $request->beneficiary_id;

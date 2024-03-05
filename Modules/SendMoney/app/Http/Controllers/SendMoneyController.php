@@ -64,17 +64,18 @@ class SendMoneyController extends Controller
 	public function create_quote(Request $request)
 	{
 		try {
-			$validate  = $request->validate([
-				'action' 			=> 	'required',
-				'send_amount' 		=> 	'required',
-				'receive_amount' 	=> 	'required',
-				'send_gateway'		=>	'required',
-				'receive_gateway'	=>	'required',
-				'send_currency'		=>	'required',
-				'receive_currency' 	=>	'required',
-				'beneficiary_id' 	=>	'required',
-				'transfer_purpose' 	=>	'sometimes',
-			]);
+			$validate  = $request->validate(
+				[
+					'action' 			=> 	'required',
+					'send_amount' 		=> 	'required',
+					'receive_amount' 	=> 	'required',
+					'send_gateway'		=>	'required',
+					'send_currency'		=>	'required',
+					'receive_currency' 	=>	'required',
+					'beneficiary_id' 	=>	'required',
+					'transfer_purpose' 	=>	'sometimes',
+				]
+			);
 
 			$beneficiary = Beneficiary::where([
 				"user_id" => active_user(),
@@ -109,7 +110,7 @@ class SendMoneyController extends Controller
 			
 			// calulate quote fees
 
-			$validate;
+			$validate['receive_gateway'] = $beneficiary->mode;
 
 			if($send = SendQuote::create($validate)){
 				// add transaction history
