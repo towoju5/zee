@@ -48,11 +48,23 @@ class MonnetServices
     {
         try {
             $merchantId = 125;
-            return $endpoint = "https://cert.api.payout.monnet.io/api/v1/{$merchantId}/payouts/{$payoutId}";
-            $request  = Http::get($endpoint)->json();
-            return $request;
-            $send = self::api_call("GET", "payouts/$payoutId");
-            return $send;
+            $HTTPmethod = "GET"; 
+            $apiSecret = "yHVNUu6tLqJH8xiSppn9Gg8yAUOhY15xWQfuw3L4Jis=";
+            $resourcePath = "/api/v1/{$merchantId}/payouts/{$payoutId}"; 
+            $timestamp  = "?timestamp=".time();
+            $sample_hashedBody = hash('sha256', json_encode([]), false);
+            $_data = $HTTPmethod.':'.$resourcePath.$timestamp.':'.$sample_hashedBody;
+            $signature = hash_hmac('sha256', $_data, $apiSecret);
+
+
+            // $endpoint = "https://cert.api.payout.monnet.io/api/v1/{$merchantId}/payouts/{$payoutId}";
+            $endpoint = 'https://cert.api.payout.monnet.io'.$resourcePath.$timestamp.'&signature='.$signature;
+            $response = Http::withHeaders([
+                'monnet-api-key' => 'G9daslndjmf2XZtbyeboxIwtq1OopE7nji28jRdt4P4=',
+                'Content-Type' => 'application/json',
+            ])->get($endpoint)->json();
+
+            return response()->json($response);
         } catch (\Throwable $th) {
             return ['error' => $th->getMessage()];
         }
