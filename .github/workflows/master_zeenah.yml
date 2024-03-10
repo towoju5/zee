@@ -68,7 +68,7 @@ jobs:
         uses: azure/webapps-deploy@v2
         id: deploy-to-webapp
         with:
-          app-name: 'yativo'
+          app-name: 'zeenah'
           slot-name: 'Production'
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_355D7A007C76482AB513E9D69C1770D8 }}
           package: .
