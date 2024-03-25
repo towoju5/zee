@@ -49,7 +49,6 @@ class BitnobController extends Controller
             ];
             $result = app('bitnob')->create($data);
             if($result) {
-                // virtual
                 return get_success_response($result);
             }
         } catch (\Throwable $th) {

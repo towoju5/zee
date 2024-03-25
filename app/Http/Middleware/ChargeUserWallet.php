@@ -17,7 +17,7 @@ class ChargeUserWallet
     {
         if(auth()->check() && $request->has('amount') && $request->has('currency')) {
             $user = $request->user();
-            // $user->debit('')
+            $wallet = $user->wallet;
         }
         return $next($request);
     }

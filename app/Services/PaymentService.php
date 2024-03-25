@@ -81,13 +81,13 @@ class PaymentService
 
     public function advcash($quoteId, $amount, $currency)
     {
-        try {
-            $advcash = new AdvcashController();
-            $init = $advcash->init($quoteId, $amount, $currency);
-            return $init;
-        } catch (\Throwable $th) {
-            return ['error' => $th->getMessage()];
-        }
+        // try {
+        //     $advcash = new AdvcashController();
+        //     $init = $advcash->init($quoteId, $amount, $currency);
+        //     return $init;
+        // } catch (\Throwable $th) {
+        //     return ['error' => $th->getMessage()];
+        // }
     }
 
     public function flutterwave($quoteId, $amount, $currency)
