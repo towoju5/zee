@@ -9,63 +9,70 @@ use Modules\Beneficiary\app\Models\Beneficiary;
 
 class MonnetServices
 {
-    public function payout($amount, $currency, $beneficiaryId)
+    public $baseUrl;
+    public function __construct()
+    {
+        $this->baseUrl = 'https://cert.api.payout.monnet.io';
+    }
+
+    public function payout($amount, $currency, $beneficiaryId) 
     {
         try {
             $country_data = self::getPaymentData($currency);
-            $apiSecret = "yHVNUu6tLqJH8xiSppn9Gg8yAUOhY15xWQfuw3L4Jis=";
+            $apiSecret = getenv('MONNET_API_SECRET');
             $HTTPmethod =    "POST";
             $resourcePath   =  "/api/v1/125/payouts";
             $timestamp  =     "?timestamp=".time();
             $request = request();
             $description = $request->description ?? "Payout requesst";
             
-            $body = $this->buildPayout($country_data['country'], $amount, $currency, uuid(), $description, $beneficiaryId);
-
-            // return response()->json($body);
+            // $body = $this->buildPayout($country_data['country'], $amount, $currency, uuid(), $description, $beneficiaryId);
+            $body = $this->buildPayoutPayload($beneficiaryId, $country_data['country']);
 
             $sample_hashedBody = hash('sha256', json_encode($body), false);
             $_data = $HTTPmethod.':'.$resourcePath.$timestamp.':'.$sample_hashedBody;
             $signature = hash_hmac('sha256', $_data, $apiSecret);
             // return $body; exit;
-            $endpoint = 'https://cert.api.payout.monnet.io'.$resourcePath.$timestamp.'&signature='.$signature;
+            $endpoint = $this->baseUrl.$resourcePath.$timestamp.'&signature='.$signature;
             $payoutDataOther = $body;
             $response = Http::withHeaders([
-                'monnet-api-key' => 'G9daslndjmf2XZtbyeboxIwtq1OopE7nji28jRdt4P4=',
+                'monnet-api-key' => getenv('MONNET_API_TOKEN'),
                 'Content-Type' => 'application/json',
             ])->post($endpoint, $payoutDataOther)->json();
 
-            Log::info(['request' => $body, 'response' => $response]);
+            Log::info(json_encode(['request' => $body, 'response' => $response]));
 
-            return $response;
+            return to_array($response);
             
         } catch (\Throwable $th) {
             return ['error' => $th->getMessage()];
         }
     }
 
-    public function payoutStatus($payoutId)
+    public function payoutStatus($payoutId = null)
     {
         try {
-            $merchantId = 125;
-            $HTTPmethod = "GET"; 
-            $apiSecret = "yHVNUu6tLqJH8xiSppn9Gg8yAUOhY15xWQfuw3L4Jis=";
-            $resourcePath = "/api/v1/{$merchantId}/payouts/{$payoutId}"; 
-            $timestamp  = "?timestamp=".time();
-            $sample_hashedBody = hash('sha256', json_encode([]), false);
+            $apiSecret = getenv('MONNET_API_SECRET');
+            $HTTPmethod = "GET";
+            $resourcePath = '/api/v1/125/payouts/'.$payoutId;
+            $timestamp  =  "?timestamp=".time();
+            $body = ''; //request()->post();
+            $sample_hashedBody = hash('sha256', '', false);
             $_data = $HTTPmethod.':'.$resourcePath.$timestamp.':'.$sample_hashedBody;
             $signature = hash_hmac('sha256', $_data, $apiSecret);
-
-
-            // $endpoint = "https://cert.api.payout.monnet.io/api/v1/{$merchantId}/payouts/{$payoutId}";
-            $endpoint = 'https://cert.api.payout.monnet.io'.$resourcePath.$timestamp.'&signature='.$signature;
+            $endpoint = $this->baseUrl.$resourcePath.$timestamp.'&signature='.$signature;
+        
             $response = Http::withHeaders([
-                'monnet-api-key' => 'G9daslndjmf2XZtbyeboxIwtq1OopE7nji28jRdt4P4=',
+                'monnet-api-key' => getenv('MONNET_API_TOKEN'),
                 'Content-Type' => 'application/json',
             ])->get($endpoint)->json();
-
-            return response()->json($response);
+        
+            Log::info(json_encode(['request' => $body, 'response' => $response]));
+            return $response;          
         } catch (\Throwable $th) {
+            if(getenv("APP_DEBUG")) {
+                return ["error"=> $th->getTrace()];
+            }
             return ['error' => $th->getMessage()];
         }
     }
@@ -80,6 +87,8 @@ class MonnetServices
         $amount = convertIntToDecimal($amount);
         $key = $payment_data['merchantKey'];
         $merchantId = $payment_data['merchantId'];
+
+        // if(!in_array($payinMethod, ['TCTD', 'BankTransfer'])) return false;
 
         $verificationString = self::generateVerificationString($merchantId, $txn, $amount, $currency, $key);
         $data = [
@@ -100,8 +109,8 @@ class MonnetServices
             'payinLanguage' => 'EN',
             'payinExpirationTime' => 30,
             'payinDateTime' => date("Y-m-d"),
-            'payinTransactionOKURL' => route("callback.monnet.success", [$user->id, $txn]),
-            'payinTransactionErrorURL' => route("callback.monnet.failed", [$user->id, $txn]),
+            'payinTransactionOKURL' => "https://cert.monnetpayments.com/api-payin/v3/online-payments", //route("callback.monnet.success", [$user->id, $txn]),
+            'payinTransactionErrorURL' => "https://cert.monnetpayments.com/api-payin/v3/online-payments", //route("callback.monnet.failed", [$user->id, $txn]),
             'payinCustomerAddress' => $user->street,
             'payinCustomerCity' => $user->city,
             'payinCustomerRegion' => $user->state,
@@ -130,7 +139,7 @@ class MonnetServices
         try {
             $data = self::buildPayinPayload($amount, $currency);
             $request = Http::post(getenv("MONNET_PAYIN__URL"), $data)->json();
-            if (strtolower($type) != 'deposit') :
+            if (strtolower($type) != 'deposit') {
                 updateSendMoneyRawData(
                     $quoteId, 
                     [
@@ -138,7 +147,7 @@ class MonnetServices
                         'gateway_response' => to_array($request)
                     ]
                 );
-            else:
+            } else {
                 updateDepositRawData(
                     $quoteId, 
                     [
@@ -146,8 +155,10 @@ class MonnetServices
                         'gateway_response' => to_array($request)
                     ]
                 );
-            endif;
+            }
+
             $response = to_array($request);
+            // echo json_encode($response, JSON_PRETTY_PRINT); exit;
 
             Log::info(json_encode(['country' => $currency, ['payload' => $data, 'response' => $response]]));
 
@@ -157,57 +168,56 @@ class MonnetServices
         }
     }
 
-    public function buildPayoutPayload($beneficiaryId)
+    public function buildPayoutPayload($beneficiaryId, $country)
     {
         $request = request();
         $customer = Beneficiary::whereId($beneficiaryId)->whereUserId(active_user())->first();
         $arr = [
-            'country' => $request->country,
-            'amount' => $request->amount,
-            'currency' => $request->currency,
+            'country' => $country,
+            'amount' => $request?->amount,
+            'currency' => $customer?->currency,
             'orderId' => uuid(),
-            'description' => $request->description ?? "Payout from " . getenv('APP_NAME'),
+            'description' => $request?->description ?? "Payout from " . getenv('APP_NAME'),
             'beneficiary' => [
-                "customerId" => $customer->id,
-                "userName" => $customer->name,
-                'name' => $customer->firstName,
-                'lastName' => $customer->lastName,
-                'email' => $customer->email,
+                "userName" => $customer?->bussinessName ?? null,
+                'name' => user()?->firstName ?? null,
+                'lastName' => user()?->lastName ?? null,
+                'email' => user()?->email ?? null,
                 'document' => [
-                    'type' => $customer->idType,
-                    'number' => $customer->document_number,
+                    'type' => $customer?->beneficiary?->document?->type ?? null,
+                    'number' => $customer?->beneficiary?->document?->number ?? null,
                 ],
                 'address' => [
-                    'street' => $customer->address->street,
-                    'houseNumber' => $customer->houseNumber,
-                    'additionalInfo' => $customer->address->additionalInfo,
-                    'city' => $customer->address->city,
-                    'province' => $customer->address->province,
-                    'zipCode' => $customer->address->zipCode,
+                    'street' => $customer?->address?->street,
+                    'houseNumber' => $customer?->houseNumber,
+                    'additionalInfo' => $customer?->address?->additionalInfo,
+                    'city' => $customer?->address?->city,
+                    'province' => $customer?->address?->province,
+                    'zipCode' => $customer?->address?->zipCode,
                 ],
             ],
             'destination' => [
                 'bankAccount' => [
-                    'bankCode' => $customer->destination->bankAccount->bank_code ?? null,
-                    'accountType' => $customer->destination->bankAccount->accountType ?? null,
-                    'accountNumber' => $customer->destination->bankAccount->accountNumber ?? null,
-                    'alias' => $customer->destination->bankAccount->alias ?? null,
-                    'cbu' => $customer->destination->bankAccount->cbu ?? null,
-                    'cci' => $customer->destination->bankAccount->cci ?? null,
-                    'clave' => $customer->destination->bankAccount->clave ?? null,
+                    'bankCode' => $customer?->payment_object?->bankAccount?->bankCode ?? null,
+                    'accountType' => $customer?->payment_object?->bankAccount?->accountType ?? null,
+                    'accountNumber' => $customer?->payment_object?->bankAccount?->accountNumber ?? null,
+                    'alias' => $customer?->payment_object?->bankAccount?->alias ?? null,
+                    'cbu' => $customer?->payment_object?->bankAccount?->cbu ?? null,
+                    'cci' => $customer?->payment_object?->bankAccount?->cci ?? null,
+                    'clabe' => $customer?->payment_object?->bankAccount?->clave ?? null,
                     'location' => [
-                        'street' => $customer->destination->bankAccount->location->street ?? null,
-                        'houseNumber' => $customer->destination->bankAccount->location->houseNumber ?? null,
-                        'additionalInfo' => $customer->destination->bankAccount->location->additionalInfo ?? null,
-                        'city' => $customer->destination->bankAccount->location->city ?? null,
-                        'province' => $customer->destination->bankAccount->location->province ?? null,
-                        'country' => $customer->destination->bankAccount->location->country ?? null,
-                        'zipCode' => $customer->destination->bankAccount->location->zipCode ?? null,
+                        'street' => $customer?->payment_object?->bankAccount?->location?->street ?? null,
+                        'houseNumber' => $customer?->payment_object?->bankAccount?->location?->houseNumber ?? null,
+                        'additionalInfo' => $customer?->payment_object?->bankAccount?->location?->additionalInfo ?? null,
+                        'city' => $customer?->payment_object?->bankAccount?->location?->city ?? null,
+                        'province' => $customer?->payment_object?->bankAccount?->location?->province ?? null,
+                        'country' => $customer?->payment_object?->bankAccount?->location?->country ?? null,
+                        'zipCode' => $customer?->payment_object?->bankAccount?->location?->zipCode ?? null,
                     ],
                 ],
             ],
         ];
-        return array_filter($arr);
+        return removeEmptyArrays($arr);
     }
 
     private function buildPayout($country, $amount, $currency, $orderId, $description, $beneficiaryId)
@@ -246,239 +256,22 @@ class MonnetServices
                     'bankAccount' => $bankAccount,
                 ],
             ];
-            if ($currency === 'ARS') {
+            if ($currency == 'ARS') {
                 $body['destination']['bankAccount']['cbu'] = $bank['cbu'];
-            } elseif ($currency === 'MXN') {
-                $body['destination']['bankAccount']['clave'] = $bank['clave'];
+            } elseif ($currency == 'MXN') {
+                $body['destination']['bankAccount']['clabe'] = $bank['clave'];
             } elseif (!empty($bank['accountNumber'])) {
                 $body['destination']['bankAccount']['accountNumber'] = $bank['accountNumber'];
-            } elseif ($bank['accountType'] == 4) {
+            } elseif (isset($bank['accountType']) && $bank['accountType'] == 4) {
                 // set document number as accountNumber
                 $body['destination']['bankAccount']['accountNumber'] = $beneficiary['document']['number'];
             }
-
+            // echo json_encode($body, JSON_PRETTY_PRINT); exit;
             return $body;
         } catch (\Throwable $th) {
             return get_error_response(['error' => $th->getMessage()]);
         }
     }
-
-    // private function buildPeruPayout()
-    // {
-    //     $body = [
-    //         'country' => 'PER',
-    //         'amount' => 100000,
-    //         'currency' => 'PEN',
-    //         'orderId' => 'R123456',
-    //         'description' => 'FreeTextFreeTextFreeTextFreeText',
-    //         'beneficiary' => [
-    //             'name' => 'Sergio',
-    //             'lastName' => 'test',
-    //             'email' => 'test@test.com',
-    //             'document' => [
-    //                 'type' => 1,
-    //                 'number' => '33446836',
-    //             ],
-    //         ],
-    //         'destination' => [
-    //             'bankAccount' => [
-    //                 'bankCode' => '001',
-    //                 'accountType' => '1',
-    //                 'accountNumber' => '00000000000',
-    //             ],
-    //         ],
-    //     ];
-    // }
-
-    // private function buildMexicoPayout()
-    // {
-    //     // if(!in_array())
-    //     $body = [
-    //         'country' => 'MEX',
-    //         'amount' => 100000,
-    //         'currency' => 'MXN',
-    //         'orderId' => 'R123456',
-    //         'description' => 'FreeTextFreeTextFreeTextFreeText',
-    //         'beneficiary' => [
-    //             'name' => 'Sergio',
-    //             'lastName' => 'test',
-    //             'email' => 'test@test.com',
-    //             'document' => [
-    //                 'type' => 1,
-    //                 'number' => '33446836',
-    //             ],
-    //         ],
-    //         'destination' => [
-    //             'bankAccount' => [
-    //                 'bankCode' => '002',
-    //                 'clave' => '002123456789123456',
-    //             ],
-    //         ],
-    //     ];
-    // }
-
-    // private function buildHondurasayout()
-    // {
-    //     $body = [
-    //         'country' => 'HND',
-    //         'amount' => 100000,
-    //         'currency' => 'HNL',
-    //         'orderId' => 'R123456',
-    //         'description' => 'FreeTextFreeTextFreeTextFreeText',
-    //         'beneficiary' => [
-    //             'name' => 'Sergio',
-    //             'lastName' => 'test',
-    //             'email' => 'test@test.com',
-    //             'document' => [
-    //                 'type' => 1,
-    //                 'number' => '33446836',
-    //             ],
-    //         ],
-    //         'destination' => [
-    //             'bankAccount' => [
-    //                 'bankCode' => '0101',
-    //                 'accountType' => '1',
-    //                 'accountNumber' => '00000000000',
-    //             ],
-    //         ],
-    //     ];
-    // }
-
-    // private function buildArgentinaPayout()
-    // {
-    //     $body = [
-    //         'country' => 'ARG',
-    //         'amount' => 100000,
-    //         'currency' => 'ARS',
-    //         'orderId' => 'R123456',
-    //         'description' => 'FreeTextFreeTextFreeTextFreeText',
-    //         'beneficiary' => [
-    //             'name' => 'Sergio',
-    //             'lastName' => 'test',
-    //             'email' => 'test@test.com',
-    //             'document' => [
-    //                 'type' => 1,
-    //                 'number' => '33446836',
-    //             ],
-    //         ],
-    //         'destination' => [
-    //             'bankAccount' => [
-    //                 'bankCode' => '002',
-    //                 'accountType' => '1',
-    //                 'cbu' => '002123456789123456',
-    //             ],
-    //         ],
-    //     ];
-    // }
-
-    // private function buildChilePayout()
-    // {
-    //     $body = [
-    //         'country' => 'CHL',
-    //         'amount' => 100000,
-    //         'currency' => 'CLP',
-    //         'orderId' => 'R123456',
-    //         'description' => 'FreeTextFreeTextFreeTextFreeText',
-    //         'beneficiary' => [
-    //             'name' => 'Sergio',
-    //             'lastName' => 'test',
-    //             'email' => 'test@test.com',
-    //             'document' => [
-    //                 'type' => 1,
-    //                 'number' => '33446836',
-    //             ],
-    //         ],
-    //         'destination' => [
-    //             'bankAccount' => [
-    //                 'bankCode' => '100',
-    //                 'accountType' => '1',
-    //                 'accountNumber' => '00000000000',
-    //             ],
-    //         ],
-    //     ];
-    // }
-
-    // private function buildColombiaPayout()
-    // {
-    //     $body = [
-    //         'country' => 'COL',
-    //         'amount' => 100000,
-    //         'currency' => 'COP',
-    //         'orderId' => 'R123456',
-    //         'description' => 'FreeTextFreeTextFreeTextFreeText',
-    //         'beneficiary' => [
-    //             'name' => 'Sergio',
-    //             'lastName' => 'test',
-    //             'email' => 'test@test.com',
-    //             'document' => [
-    //                 'type' => 1,
-    //                 'number' => '33446836',
-    //             ],
-    //         ],
-    //         'destination' => [
-    //             'bankAccount' => [
-    //                 'bankCode' => '001',
-    //                 'accountType' => '1',
-    //                 'accountNumber' => '00000000000',
-    //             ],
-    //         ],
-    //     ];
-    // }
-
-    // private function buildEcuadorPayout()
-    // {
-    //     $body = [
-    //         'country' => 'ECU',
-    //         'amount' => 100000,
-    //         'currency' => 'USD',
-    //         'orderId' => 'R123456',
-    //         'description' => 'FreeTextFreeTextFreeTextFreeText',
-    //         'beneficiary' => [
-    //             'name' => 'Sergio',
-    //             'lastName' => 'test',
-    //             'email' => 'test@test.com',
-    //             'document' => [
-    //                 'type' => 1,
-    //                 'number' => '33446836',
-    //             ],
-    //         ],
-    //         'destination' => [
-    //             'bankAccount' => [
-    //                 'bankCode' => '100',
-    //                 'accountType' => '1',
-    //                 'accountNumber' => '00000000000',
-    //             ],
-    //         ],
-    //     ];
-    // }
-
-    // private function buildGuatemalaPayout()
-    // {
-    //     $body = [
-    //         'country' => 'GTM',
-    //         'amount' => 100000,
-    //         'currency' => 'GTQ',
-    //         'orderId' => 'R123456',
-    //         'description' => 'FreeTextFreeTextFreeTextFreeText',
-    //         'beneficiary' => [
-    //             'name' => 'Sergio',
-    //             'lastName' => 'test',
-    //             'email' => 'test@test.com',
-    //             'document' => [
-    //                 'type' => 1,
-    //                 'number' => '33446836',
-    //             ],
-    //         ],
-    //         'destination' => [
-    //             'bankAccount' => [
-    //                 'bankCode' => '0101',
-    //                 'accountType' => '1',
-    //                 'accountNumber' => '00000000000',
-    //             ],
-    //         ],
-    //     ];
-    // }
-
     public function api_call(string $method = "GET", string $endpoint = "", array $payload = [], $type = 'payin')
     {
         $monnet_api = getenv("MONNET_PAYOUT_URL");

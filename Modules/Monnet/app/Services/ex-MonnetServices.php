@@ -138,7 +138,10 @@ class MonnetServices
             $request = Http::post(getenv("MONNET_PAYIN__URL"), $data)->json();
             updateSendMoneyRawData($quoteId, $data);
             $response = to_array($request);
-            return $response["url"];
+            if(isset($response["url"]))
+                return $response["url"];
+
+            return [['error'] => $response];
         } catch (\Throwable $th) {
             return ['error' => $th->getMessage()];
         }

@@ -28,10 +28,10 @@ class CoinpaymentServices
 
     /**
      * Creates a transfer from your account to a specified merchant.<br />
-     * @param amount The amount of the transaction (floating point to 8 decimals).
-     * @param currency The cryptocurrency to withdraw.
-     * @param merchant The merchant ID to send the coins to.
-     * @param auto_confirm If auto_confirm is TRUE, then the transfer will be performed without an email confirmation.
+     * @param float amount The amount of the transaction (floating point to 8 decimals).
+     * @param string currency The cryptocurrency to withdraw.
+     * @param string merchant The merchant ID to send the coins to.
+     * @param bool auto_confirm If auto_confirm is TRUE, then the transfer will be performed without an email confirmation.
      */
     public function status($txid = 'CPFE7NQ3M7O0BUOXRDJUGQ7N15')
     {
@@ -53,12 +53,12 @@ class CoinpaymentServices
     /**
      * Creates a basic transaction with minimal parameters.<br />
      * See CreateTransaction for more advanced features.
-     * @param amount The amount of the transaction (floating point to 8 decimals).
-     * @param currency1 The source currency (ie. USD), this is used to calculate the exchange rate for you.
-     * @param currency2 The cryptocurrency of the transaction. currency1 and currency2 can be the same if you don't want any exchange rate conversion.
-     * @param buyer_email Set the buyer's email so they can automatically claim refunds if there is an issue with their payment.
-     * @param address Optionally set the payout address of the transaction. If address is empty then it will follow your payout settings for that coin.
-     * @param ipn_url Optionally set an IPN handler to receive notices about this transaction. If ipn_url is empty then it will use the default IPN URL in your account.
+     * @param float amount The amount of the transaction (floating point to 8 decimals).
+     * @param string currency1 The source currency (ie. USD), this is used to calculate the exchange rate for you.
+     * @param string currency2 The cryptocurrency of the transaction. currency1 and currency2 can be the same if you don't want any exchange rate conversion.
+     * @param string buyer_email Set the buyer's email so they can automatically claim refunds if there is an issue with their payment.
+     * @param string address Optionally set the payout address of the transaction. If address is empty then it will follow your payout settings for that coin.
+     * @param string ipn_url Optionally set an IPN handler to receive notices about this transaction. If ipn_url is empty then it will use the default IPN URL in your account.
      */
     public function CreateTransactionSimple($amount, $currency1, $currency2, $buyer_email, $address = '', $ipn_url = '')
     {

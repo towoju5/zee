@@ -16,6 +16,7 @@ use Modules\Monnet\app\Services\MonnetServices;
 use Modules\Monnify\app\Http\Controllers\MonnifyController;
 use Modules\PayPal\app\Http\Controllers\PayPalDepositController;
 use Modules\PayPal\app\Providers\PayPalServiceProvider;
+use Modules\Pomelo\app\Http\Controllers\PomeloController;
 use Modules\SendMoney\app\Models\SendMoney;
 use Modules\SendMoney\app\Models\SendQuote;
 
@@ -62,7 +63,7 @@ class PaymentService
         }
     }
 
-    public function deposit($amount, $currency, $gateway)
+    public function local_payment($amount, $currency, $gateway)
     {
         //
     }
@@ -143,6 +144,21 @@ class PaymentService
         $flow = new FlowController();
         $checkout = $flow->makePayment($quoteId, $amount, $currency);
         return $checkout;
+    }
+
+    public function pomelo($quoteId, $amount, $currency)
+    {
+        if(!in_array($currency, ["CLP"])) {
+            return ["error" => "Unknown currency selected"];
+        }
+        $flow = new PomeloController();
+        $checkout = $flow->makePayment($quoteId, $amount, $currency);
+        return $checkout;
+    }
+
+    public function transak($quoteId, $amount, $currency)
+    {
+        //
     }
 }
 

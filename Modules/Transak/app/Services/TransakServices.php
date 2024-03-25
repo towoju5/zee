@@ -18,4 +18,9 @@ class TransakServices
 
         return $response->getBody();
     }
+
+    public function create_url()
+    {
+        $request = request();
+    }
 }

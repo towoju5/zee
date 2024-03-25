@@ -16,9 +16,9 @@ class Beneficiary extends Model
     protected $guarded = [];
 
     protected $casts = [
-        "address" => "array",
-        "beneficiary" => "array",
-        "payment_object" => "array"
+        "address" => "object",
+        "beneficiary" => "object",
+        "payment_object" => "object"
     ];
     
     protected static function newFactory(): BeneficiaryFactory

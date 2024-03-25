@@ -57,7 +57,7 @@ class FlutterwaveController extends Controller
             $transactionID = Flutterwave::getTransactionIDFromCallback();
             return Flutterwave::verifyTransaction($transactionID);
             // return $data;
-            return view("payment.success");
+            // return view("payment.success");
         } catch (\Throwable $th) {
             return ['error' => $th->getMessage()];
         }

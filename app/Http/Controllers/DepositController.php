@@ -46,12 +46,14 @@ class DepositController extends Controller
             $deposit->gateway = $request->gateway;
             $deposit->currency = $request->currency;
             if ($deposit->save()) {
-                // return response()->json($deposit); exit;
                 // add transaction history
                 Transaction::dispatch($deposit->toArray(), 'deposit');
                 // now call the payment endpoint
                 $payment = new DepositService(); 
                 $callback = $payment->makeDeposit($request->gateway, $request->currency, $request->amount, $deposit);
+                if(empty($callback) OR !is_string($callback)) {
+                    return get_error_response($callback);
+                }
                 return get_success_response(
                     [
                         'deposit_url' => $callback,

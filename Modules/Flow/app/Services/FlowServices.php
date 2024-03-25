@@ -41,7 +41,7 @@ class FlowServices
                 throw new Exception("Unexpected error occurred. HTTP_CODE: " . $code, $code);
             }
         }
-        $body = json_decode($response["output"], true);
+        $body = to_array($response["output"], true);
         return $body;
     }
 

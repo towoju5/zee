@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Modules\Currencies\app\Http\Controllers\CurrenciesController;
 
 /*
     |--------------------------------------------------------------------------
@@ -15,5 +16,5 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware(['auth:api'])->prefix('v1')->name('api.')->group(function () {
-    Route::get('currencies', fn (Request $request) => $request->user())->name('currencies');
+    Route::get('currencies', [CurrenciesController::class, 'index'])->name('currencies');
 });

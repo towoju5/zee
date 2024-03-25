@@ -26,6 +26,7 @@ class SendMoneyController extends Controller
 			get_error_response(['error'  => $th->getMessage()]);
 		}
     }
+	
     public function get_quote($id)
     {
         try {
@@ -49,11 +50,11 @@ class SendMoneyController extends Controller
 			]);
 	
 			if($request->action == 'deliver_by') {
-				$gateways = Gateways::where('payout', true)->whereJsonContains('supported_currencies', $request->currency)->get();
+				$gateways = Gateways::where('payout', true)->whereJsonContains('payout_currencies', $request->currency)->get();
 			}
 	
 			if($request->action == 'pay_by') {
-				$gateways = Gateways::where('deposit', true)->whereJsonContains('supported_currencies', $request->currency)->get();
+				$gateways = Gateways::where('deposit', true)->whereJsonContains('payin_currencies', $request->currency)->get();
 			}
 			return get_success_response($gateways);
 		} catch (\Throwable $th) {
@@ -71,7 +72,7 @@ class SendMoneyController extends Controller
 					'receive_amount' 	=> 	'required',
 					'send_gateway'		=>	'required',
 					'send_currency'		=>	'required',
-					'receive_currency' 	=>	'required',
+					// 'receive_currency' 	=>	'required',
 					'beneficiary_id' 	=>	'required',
 					'transfer_purpose' 	=>	'sometimes',
 				]
@@ -87,7 +88,7 @@ class SendMoneyController extends Controller
 			}
 
 			$check_send_gateway = self::method_exists($request->send_gateway, $request->send_currency, 'deposit');
-			$check_receive_gateway = self::method_exists($request->receive_gateway, $request->receive_currency, 'payout');
+			$check_receive_gateway = self::method_exists($beneficiary->mode, $beneficiary->currency, 'payout');
 
 			if($check_send_gateway < 1 || $check_receive_gateway < 1) {
 				return get_error_response(['error' => 'Unknown gateway or unsupported currency selected']);
@@ -111,6 +112,7 @@ class SendMoneyController extends Controller
 			// calulate quote fees
 
 			$validate['receive_gateway'] = $beneficiary->mode;
+			$validate['receive_currency'] = $beneficiary->currency;
 
 			if($send = SendQuote::create($validate)){
 				// add transaction history
@@ -184,7 +186,10 @@ class SendMoneyController extends Controller
 			'slug' => $method,
 			$mode => true
 		];
-		$gate = Gateways::where($where)->whereJsonContains('supported_currencies', $currency)->count();
+
+		if($mode == 'deposit') $process_mode = "payin_currencies";
+		if($mode == 'payout') $process_mode = "payout_currencies";
+		$gate = Gateways::where($where)->whereJsonContains($process_mode, $currency)->count();
 		return $gate;
 	}
 }  

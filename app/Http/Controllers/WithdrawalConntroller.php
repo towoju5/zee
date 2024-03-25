@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Gateways;
 use App\Models\Withdraw;
 use App\Notifications\WithdrawalNotification;
+use App\Services\PayoutService;
 use Illuminate\Http\Request;
 use Modules\Beneficiary\app\Models\Beneficiary;
 use Modules\Monnet\app\Services\MonnetServices;
@@ -23,39 +25,36 @@ class WithdrawalConntroller extends Controller
     public function store(Request $request)
     {
         try {
-            $valitdate = $request->validate([
+            $validate = $request->validate([
                 'beneficiary_id' => 'required',
-                'amount' => 'required',
-                'gateway' => 'required',
-                'currency' => 'required',
+                'amount' => 'required'
             ]);
 
             $is_beneficiary = Beneficiary::where(['user_id' => active_user(), 'id' => $request->beneficiary_id])->first();
             if (!$is_beneficiary) {
-                return get_error_response(['error' => "Invalid beneficiary"]);
+                return get_error_response(['error' => "Beneficiary not found"]);
             }
-            $valitdate['user_id'] = auth()->id();
-            $valitdate['raw_data'] = $request->all();
-            $validate['receive_gateway'] = $is_beneficiary->mode;
-            if ($create = Withdraw::create($valitdate)) {
-                $monnet = new MonnetServices();
-                $beneficiaryId = $request->beneficiary_id;
+        
+            $gateway = Gateways::where([
+                // 'payout' => true,
+                'slug' => $is_beneficiary->mode
+            ])->whereJsonContains('payout_currencies', $is_beneficiary->currency)->first();
 
-                $beneficiary = Beneficiary::whereId($beneficiaryId)
-                                ->whereUserId(auth()->id())->first();
-                if (!$beneficiary) {
-                    return get_error_response(['error' => "Beneficiary not found"]);
-                }
-
-                $checkout = $monnet->payout(
-                    $request->amount,
-                    $request->currency,
-                    $beneficiaryId
-                );
-                if ($checkout) {
-                    user()->notify(new WithdrawalNotification($create));
-                    return get_success_response($checkout);
-                }
+            if(!$gateway) {
+                return get_error_response(['error' => "The choosen withdrawal method is invalid or currently unavailable"]);
+			}
+            $validate['user_id'] = auth()->id();
+            $validate['raw_data'] = $request->all();
+            $validate['gateway'] = $is_beneficiary->mode;
+            $validate['currency'] = $is_beneficiary->currency;
+            $create = Withdraw::create($validate);
+            if ($create) {
+                $payout = new PayoutService();
+                $checkout = $payout->makePayment($create->id, $is_beneficiary->mode);
+                $create->raw_data = $checkout;
+                $create->save();
+                user()->notify(new WithdrawalNotification($create));
+                return get_success_response($checkout);
             }
         } catch (\Throwable $th) {
             return get_error_response(['error' => $th->getMessage()]);

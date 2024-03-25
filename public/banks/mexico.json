@@ -1,0 +1,350 @@
+[
+    {
+        "code": "001",
+        "name": "BANXICO"
+    },
+    {
+        "code": "006",
+        "name": "Banco Nacional de Comercio Exterior"
+    },
+    {
+        "code": "009",
+        "name": "BANOBRAS"
+    },
+    {
+        "code": "019",
+        "name": "Banco Nacional del Ejercito y Fuerza Aerea y Armada"
+    },
+    {
+        "code": "135",
+        "name": "Nacional Financiera"
+    },
+    {
+        "code": "166",
+        "name": "Bansefi"
+    },
+    {
+        "code": "168",
+        "name": "Hipotecaria Federal"
+    },
+    {
+        "code": "002",
+        "name": "Banamex"
+    },
+    {
+        "code": "012",
+        "name": "BBVA"
+    },
+    {
+        "code": "014",
+        "name": "Santander Mexicano"
+    },
+    {
+        "code": "021",
+        "name": "HSBC"
+    },
+    {
+        "code": "030",
+        "name": "Banco del Bajio"
+    },
+    {
+        "code": "032",
+        "name": "Ixe Banco"
+    },
+    {
+        "code": "036",
+        "name": "Banco Inbursa"
+    },
+    {
+        "code": "042",
+        "name": "Banca Mifel"
+    },
+    {
+        "code": "044",
+        "name": "Scotiabank"
+    },
+    {
+        "code": "058",
+        "name": "Banco Regional de Monterrey"
+    },
+    {
+        "code": "059",
+        "name": "Banco Invex"
+    },
+    {
+        "code": "060",
+        "name": "Bansi"
+    },
+    {
+        "code": "062",
+        "name": "Banco Afirme"
+    },
+    {
+        "code": "072",
+        "name": "Banorte"
+    },
+    {
+        "code": "106",
+        "name": "Bank of America Mexico"
+    },
+    {
+        "code": "108",
+        "name": "MUFG"
+    },
+    {
+        "code": "110",
+        "name": "JP Morgan"
+    },
+    {
+        "code": "112",
+        "name": "BMONEX"
+    },
+    {
+        "code": "113",
+        "name": "VE POR MAS"
+    },
+    {
+        "code": "126",
+        "name": "Credit Suisse"
+    },
+    {
+        "code": "127",
+        "name": "Azteca"
+    },
+    {
+        "code": "128",
+        "name": "AUTOFIN"
+    },
+    {
+        "code": "129",
+        "name": "BARCLAYS"
+    },
+    {
+        "code": "130",
+        "name": "COMPARTAMOS"
+    },
+    {
+        "code": "132",
+        "name": "MULTIVA BANCO"
+    },
+    {
+        "code": "133",
+        "name": "ACTINVER"
+    },
+    {
+        "code": "136",
+        "name": "INTERCAM BANCO"
+    },
+    {
+        "code": "137",
+        "name": "BANCOPPEL"
+    },
+    {
+        "code": "138",
+        "name": "ABC CAPITAL"
+    },
+    {
+        "code": "140",
+        "name": "CONSUBANCO"
+    },
+    {
+        "code": "141",
+        "name": "VOLKSWAGEN"
+    },
+    {
+        "code": "143",
+        "name": "CIBANCO"
+    },
+    {
+        "code": "145",
+        "name": "BBASE"
+    },
+    {
+        "code": "147",
+        "name": "BANKAOOL"
+    },
+    {
+        "code": "148",
+        "name": "PAGATODO"
+    },
+    {
+        "code": "150",
+        "name": "INMOBILIARIO"
+    },
+    {
+        "code": "151",
+        "name": "DONDE"
+    },
+    {
+        "code": "152",
+        "name": "BANCREA"
+    },
+    {
+        "code": "154",
+        "name": "BANCO COVALTO"
+    },
+    {
+        "code": "155",
+        "name": "ICBC"
+    },
+    {
+        "code": "156",
+        "name": "SABADELL"
+    },
+    {
+        "code": "157",
+        "name": "SHINHAN"
+    },
+    {
+        "code": "158",
+        "name": "MIZUHO BANK"
+    },
+    {
+        "code": "159",
+        "name": "BANK OF CHINA"
+    },
+    {
+        "code": "160",
+        "name": "BANCO S3"
+    },
+    {
+        "code": "600",
+        "name": "MONEXCB"
+    },
+    {
+        "code": "601",
+        "name": "GBM"
+    },
+    {
+        "code": "602",
+        "name": "MASARI"
+    },
+    {
+        "code": "605",
+        "name": "VALUE"
+    },
+    {
+        "code": "608",
+        "name": "VECTOR"
+    },
+    {
+        "code": "613",
+        "name": "MULTIVA CBOLSA"
+    },
+    {
+        "code": "616",
+        "name": "FINAMEX"
+    },
+    {
+        "code": "617",
+        "name": "VALMEX"
+    },
+    {
+        "code": "620",
+        "name": "PROFUTURO"
+    },
+    {
+        "code": "630",
+        "name": "CB INTERCAM"
+    },
+    {
+        "code": "631",
+        "name": "CI BOLSA"
+    },
+    {
+        "code": "634",
+        "name": "FINCOMUN"
+    },
+    {
+        "code": "638",
+        "name": "NU MEXICO"
+    },
+    {
+        "code": "646",
+        "name": "STP"
+    },
+    {
+        "code": "648",
+        "name": "TACTIV CB"
+    },
+    {
+        "code": "652",
+        "name": "CREDICAPITAL"
+    },
+    {
+        "code": "653",
+        "name": "KUSPIT"
+    },
+    {
+        "code": "656",
+        "name": "UNAGRA"
+    },
+    {
+        "code": "659",
+        "name": "ASP INTEGRA OPC"
+    },
+    {
+        "code": "661",
+        "name": "ALTERNATIVOS"
+    },
+    {
+        "code": "670",
+        "name": "LIBERTAD"
+    },
+    {
+        "code": "677",
+        "name": "CAJA POP MEXICA"
+    },
+    {
+        "code": "680",
+        "name": "CRISTOBAL COLON"
+    },
+    {
+        "code": "683",
+        "name": "CAJA TELEFONIST"
+    },
+    {
+        "code": "684",
+        "name": "OPM"
+    },
+    {
+        "code": "685",
+        "name": "FONDO (FIRA)"
+    },
+    {
+        "code": "686",
+        "name": "INVERCAP"
+    },
+    {
+        "code": "688",
+        "name": "CREDICLUB"
+    },
+    {
+        "code": "689",
+        "name": "FOMPED"
+    },
+    {
+        "code": "703",
+        "name": "TESORED"
+    },
+    {
+        "code": "706",
+        "name": "ARCUS"
+    },
+    {
+        "code": "710",
+        "name": "NVIO"
+    },
+    {
+        "code": "901",
+        "name": "CLS"
+    },
+    {
+        "code": "902",
+        "name": "INDEVAL"
+    },
+    {
+        "code": "903",
+        "name": "CoDi Valida"
+    }
+]

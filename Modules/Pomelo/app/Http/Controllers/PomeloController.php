@@ -17,17 +17,14 @@ class PomeloController extends Controller
         $this->pomelo_services = new PomeloPayServices();
     }
 
-    public function makePayment(Request $request)
+    public function makePayment($quoteId, $amount, $currency)
     {
         try {
-            $request->validate([
-                'amount' => 'required',
-                'currency' => 'currency'
-            ]);
-            $checkout = $this->pomelo_services->init($request->amount, $request->currency);
-            return get_success_response($checkout);
+            $checkout = $this->pomelo_services->init($amount, $currency);
+            updateSendMoneyRawData($quoteId, $checkout);
+            return to_array($checkout);
         } catch (\Throwable $th) {
-            return get_error_response(['error' => $th->getMessage()]);
+            return ['error' => $th->getMessage()];
         }
     }
 

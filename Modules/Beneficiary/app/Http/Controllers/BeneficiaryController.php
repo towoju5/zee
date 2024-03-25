@@ -87,13 +87,31 @@ class BeneficiaryController extends Controller
     public function update(Request $request, $id): JsonResponse
     {
         try {
-            $data['user_id'] = active_user();
-            $data['beneficiary'] = $request->beneficiary;
+            $validate = $request->validate([
+                "mode" => "required",
+                "address" => "required",
+                "nickname" => "required",
+                "currency" => "required",
+                "beneficiary" => "required",
+                "destination" => "sometimes",
+                "payment_object" => "sometimes",
+            ]);
+            $data = Beneficiary::find($id);
+            $data->user_id        = active_user();
+            $data->nickname       = $request->nickname;
+            $data->mode           = $request->mode;
+            $data->currency       = $request->currency;
+            $data->address        = $request->address;
+            $data->beneficiary    = $request->beneficiary;
+            $data->payment_object = $request->payment_object ?? $request->destination;
 
-            if($data) {
-                return get_success_response($data);
+            if ($data->save()) {
+                if (isApi())
+                    return get_success_response($data);
+
+                return $data;
             }
-            return get_error_response(['error' => 'Currently unable to add new beneficiaries']);
+            return get_error_response(['error' => 'Currently unable to update beneficiary']);
         } catch (\Throwable $th) {
             return get_error_response(['error' => $th->getMessage()]);
         }

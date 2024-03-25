@@ -52,7 +52,7 @@ class DepositService
         }
     }
 
-    public function deposit($amount, $currency, $gateway)
+    public function local_payment($amount, $currency, $gateway)
     {
         //
     }

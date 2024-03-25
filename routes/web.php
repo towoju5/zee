@@ -13,9 +13,12 @@ use Modules\ShuftiPro\app\Http\Controllers\ShuftiProController;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-
 Route::get('/', function () {
     return view('welcome');
+    // $directory = base_path();
+    // $prefix = '._'; 
+    
+    // deleteFilesStartingWith($directory, $prefix);
 });
 
 Route::middleware([

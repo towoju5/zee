@@ -16,11 +16,13 @@ class Gateways extends Model
         'status',
         'payout',
         'deposit',
-        'supported_currencies'
+        'payin_currencies',
+        'payout_currencies',
     ];
 
     protected $casts = [
-        'supported_currencies' => 'array'
+        'payin_currencies' => 'array',
+        'payout_currencies' => 'array',
     ];
     
     /**

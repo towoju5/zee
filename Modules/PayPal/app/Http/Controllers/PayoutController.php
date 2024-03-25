@@ -27,8 +27,9 @@ class PayoutController extends Controller
     // paypal payout starts here
     public function init($quoteId)
     {
+        $request = request();
         $quote = SendQuote::whereId($quoteId)->first();
-        $user = $get_user($quote->user_id);
+        $user = get_user($quote->user_id);
         $requestBody = [
             'sender_batch_header' => [ 
                 'email_subject' => 'Payout from $user->name via ' . getenv('APP_NAME'),

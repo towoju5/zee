@@ -3,6 +3,7 @@
 use App\Models\Balance;
 use App\Models\Country;
 use App\Models\Deposit;
+use App\Models\Gateways;
 use App\Models\settings;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
@@ -78,12 +79,12 @@ if (!function_exists('settings')) {
     /**
      * Gera a paginação dos itens de um array ou collection.
      *
-     * @param array|Collection      $items
+     * @param array| Collection $items
      * @param int   $perPage
      * @param int  $page
      * @param array $options
      *
-     * @return Strings
+     * @return string
      */
     function settings(string $key): string
     {
@@ -112,7 +113,6 @@ if (!function_exists('get_current_balance')) {
 if (!function_exists('get_fees')) {
     function get_fees($currency1, $amount, $currency2)
     {
-        // return true;
         return 1;
     }
 }
@@ -123,7 +123,6 @@ if (!function_exists('getExchangeVal')) {
      */
     function getExchangeVal($currency1, $currency2)
     {
-        // return true;
         return 1;
     }
 }
@@ -132,19 +131,28 @@ if (!function_exists('per_page')) {
     /**
      * Get and return the exchange rate
      */
-    function per_page($perpage = null)
+    function per_page($perPage = null)
     {
         return $perPage ?? 10;
     }
 }
 
-if (!function_exists('user')) {
+if (!function_exists('removeEmptyArrays')) {
     /**
-     * Get and return the exchange rate
+     * Get current user object
      */
-    function user()
-    {
-        return User::find(auth()->id());
+    function removeEmptyArrays($array) {
+        foreach ($array as $key => &$value) {
+            if (is_array($value)) {
+                $value = removeEmptyArrays($value); // Recursively call the function for nested arrays
+                if (empty($value)) {
+                    unset($array[$key]); // Remove empty arrays
+                }
+            } elseif ($value === null || $value === '') {
+                unset($array[$key]); // Remove null or empty values
+            }
+        }
+        return $array;
     }
 }
 
@@ -366,6 +374,14 @@ if (!function_exists('active_user')) {
     }
 }
 
+if (!function_exists('get_user')) {
+    function get_user($userId)
+    {
+        $user = User::find($userId);
+        return $user;
+    }
+}
+
 if (!function_exists('monnet_error_code')) {
     /**
      * Monnet payin error codes
@@ -458,5 +474,28 @@ if(!function_exists('updateDepositRawData')) {
                 'raw_data' => $data
             ]
         );
+    }
+}
+
+
+if(!function_exists('deleteFilesStartingWith')) {
+    function deleteFilesStartingWith($dir, $prefix) {
+        // ini_set('max_execution_time', 0);
+
+        $files = glob(base_path() . '/*');
+        $total = 0;
+        
+        foreach ($files as $file) {
+            if (is_file($file) && strpos(basename($file), $prefix) === 0) {
+                unlink($file);
+                echo "Deleted file: $file\n";
+                sleep(10);
+                $total++;
+            } elseif (is_dir($file)) {
+                deleteFilesStartingWith($file, $prefix);
+            }
+        }
+
+        echo $total ." Number of files removed";
     }
 }

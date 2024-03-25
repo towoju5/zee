@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Modules\Currencies\app\Models\Currency;
 
 class CurrenciesController extends Controller
 {
@@ -14,7 +15,16 @@ class CurrenciesController extends Controller
      */
     public function index()
     {
-        return view('currencies::index');
+        try {
+            $currencies = Currency::all();
+            if($currencies) {
+                return get_success_response($currencies);
+            }
+
+            return get_error_response(['error' => "No currency found"]);
+        } catch (\Throwable $th) {
+            return get_error_response(['error' => $th->getMessage()]);
+        }
     }
 
     /**

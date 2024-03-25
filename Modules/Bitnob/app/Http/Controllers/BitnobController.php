@@ -49,6 +49,7 @@ class BitnobController extends Controller
             ];
             $result = app('bitnob')->create($data);
             if($result) {
+                // virtual
                 return get_success_response($result);
             }
         } catch (\Throwable $th) {
@@ -80,7 +81,6 @@ class BitnobController extends Controller
          */
         try {
             if($action != 'freeze' AND $action != 'unfreeze') return get_error_response(['error' => 'Invalid action type']);
-            $action = $action; 
             $result = app('bitnob')->action($action, $cardId);
             if($result) {
                 return get_success_response($result);

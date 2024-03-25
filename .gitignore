@@ -21,3 +21,4 @@ yarn-error.log
 /config/database.php
 config/database.php
 *database.php
+._*
